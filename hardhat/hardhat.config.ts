@@ -1,23 +1,27 @@
-require("@nomicfoundation/hardhat-toolbox");
-require("dotenv").config();
+import { config as dotConfig } from "dotenv";
+import { HardhatUserConfig } from "hardhat/config";
+import "@nomicfoundation/hardhat-toolbox";
+import "hardhat-deploy";
 
-/** @type import('hardhat/config').HardhatUserConfig */
-module.exports = {
-    solidity: "0.8.17",
+dotConfig();
+
+const PRIVATE_KEY = String(process.env.PRIVATE_KEY);
+
+const config: HardhatUserConfig = {
     networks: {
         alfajores: {
             url: "https://alfajores-forno.celo-testnet.org",
-            accounts: [process.env.PRIVATE_KEY],
+            accounts: [PRIVATE_KEY],
         },
         celo: {
             url: "https://forno.celo.org",
-            accounts: [process.env.PRIVATE_KEY],
+            accounts: [PRIVATE_KEY],
         },
     },
     etherscan: {
         apiKey: {
-            alfajores: process.env.CELOSCAN_API_KEY,
-            celo: process.env.CELOSCAN_API_KEY,
+            alfajores: String(process.env.CELOSCAN_API_KEY),
+            celo: String(process.env.CELOSCAN_API_KEY),
         },
         customChains: [
             {
@@ -38,4 +42,30 @@ module.exports = {
             },
         ],
     },
+
+    namedAccounts: {
+        deployer: {
+          default: 0,
+          44787: `privatekey://${PRIVATE_KEY}`,
+          42220: `privatekey://${PRIVATE_KEY}`,
+        },
+        cUSD: {
+            default: 1,
+            44787: "",
+            42220: ""
+        }
+      },
+    
+    solidity: {
+    version: "0.8.20",
+    settings: {          // See the solidity docs for advice about optimization and evmVersion
+        optimizer: {
+        enabled: true,
+        runs: 200,
+        },
+        evmVersion: "byzantium"
+        }
+    },
 };
+
+export default config;
