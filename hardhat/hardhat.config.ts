@@ -51,7 +51,7 @@ const config: HardhatUserConfig = {
         },
         cUSD: {
             default: 1,
-            44787: "",
+            44787: "0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1",
             42220: ""
         }
       },

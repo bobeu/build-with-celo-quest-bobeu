@@ -9,6 +9,13 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const networkName = getNetworkName();
   console.log("Network Name", networkName); 
 
+  const feeReceiver = await deploy("FeeReceiver", {
+    from: deployer,
+    args: [],
+    log: true,
+  });
+  console.log("TestToken address", feeReceiver.address);
+  
   const testToken = await deploy("TestToken", {
     from: deployer,
     args: [],
@@ -18,7 +25,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   
   const registry = await deploy("Registry", {
     from: deployer,
-    args: [[testToken.address], cUSD],
+    args: [[testToken.address], cUSD, feeReceiver.address],
     log: true,
   });
   console.log("Registry address", registry.address);
@@ -28,7 +35,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
 export default func;
 
-func.tags = ["TestToken", "Registry"];
+func.tags = ["TestToken", "Registry", "feeReceiver"];
 
 
 
