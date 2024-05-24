@@ -1,7 +1,5 @@
-import {
-    RainbowKitProvider,
-    connectorsForWallets,
-} from "@rainbow-me/rainbowkit";
+import React from "react";
+import { RainbowKitProvider, connectorsForWallets,} from "@rainbow-me/rainbowkit";
 import { injectedWallet } from "@rainbow-me/rainbowkit/wallets";
 import "@rainbow-me/rainbowkit/styles.css";
 import type { AppProps } from "next/app";
@@ -37,8 +35,14 @@ const config = createConfig({
 const queryClient = new QueryClient();
 
 function App({ Component, pageProps }: AppProps) {
+    const [isMounted, setIsMounted] = React.useState(false);
+    
+    React.useEffect(() => {
+        setIsMounted(true);
+    }, []);
+
     return (
-        <WagmiProvider config={config}>
+        isMounted? <WagmiProvider config={config}>
             <QueryClientProvider client={queryClient}>
                 <RainbowKitProvider>
                     <Layout>
@@ -46,7 +50,7 @@ function App({ Component, pageProps }: AppProps) {
                     </Layout>
                 </RainbowKitProvider>
             </QueryClientProvider>
-        </WagmiProvider>
+        </WagmiProvider> : null
     );
 }
 

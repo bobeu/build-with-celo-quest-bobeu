@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
 import { useAccount } from "wagmi";
+import Container from "@mui/material/Container";
+import { Home as HomePage } from "@/components/Home";
+import { InitStorage, Storage } from "@/components/apis/readContract";
+import { SectionId } from "@/components/Footer";
 
 export default function Home() {
-    const [userAddress, setUserAddress] = useState("");
-    const [isMounted, setIsMounted] = useState(false);
+    const [userAddress, setUserAddress] = useState<string>("");
+    const [ searchText, setSearchText ] = useState<string>("");
     const { address, isConnected } = useAccount();
-
-    useEffect(() => {
-        setIsMounted(true);
-    }, []);
+    const [ storage, setStorage ] = useState<Storage>(new InitStorage().mockStorage);
 
     useEffect(() => {
         if (isConnected && address) {
@@ -16,22 +17,22 @@ export default function Home() {
         }
     }, [address, isConnected]);
 
-    if (!isMounted) {
-        return null;
-    }
+    const sections : {id: SectionId, element: JSX.Element}[] = [
+        {
+            id: "Home",
+            element: <HomePage { ...{mockStorage: storage, searchText} } />
+        },
+    ]
 
     return (
-        <div className="flex flex-col justify-center items-center">
-            <div className="h1">
-                There you go... a canvas for your next Celo project!
-            </div>
-            {isConnected ? (
-                <div className="h2 text-center">
-                    Your address: {userAddress}
-                </div>
-            ) : (
-                <div>No Wallet Connected</div>
-            )}
-        </div>
+        <Container maxWidth={"lg"}>
+            {
+                sections.map(({ id, element }) => (
+                    <section key={id} id={id}>
+                        { element }
+                    </section>
+                ))
+            }
+        </Container>
     );
 }
