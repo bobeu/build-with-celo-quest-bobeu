@@ -4,6 +4,7 @@ pragma solidity 0.8.20;
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 interface IRegistry {
+    enum Category { MEME, NFT, DEFI, GOVERNANCE, RWA, GAMING, YIELDOPTIMIZER, SPORT, PRIVACY, METAVERSE }
     error InvalidAssetId(uint assetId);
     error TokenBalanceInStoreTooLow();
     error NotPermitted();
@@ -29,12 +30,19 @@ interface IRegistry {
         string name;
         string symbol;
         uint8 decimals;
+        Category category;
     }
 
     struct SupportedAsset {
         uint assetId;
         IERC20 asset;
         bool isVerified;
+        Category category;
+    }
+
+    struct Wallet {
+        address owner;
+        address xWallet;
     }
 
     struct WalletInfo {
@@ -42,9 +50,10 @@ interface IRegistry {
         bool hasWallet;
     }
 
-    struct Wallet {
-        address owner;
-        address xWallet;
+    struct Storage {
+        StoreData[] stores;
+        SupportedAsset[] supportedAssets;
+        Wallet[] xWallets;
     }
 
     function addItemToStoreFront(uint assetId, uint224 priceLimit) external returns(bool);

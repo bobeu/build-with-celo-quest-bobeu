@@ -65,7 +65,7 @@ describe("Lock", function () {
     it("Should confirm that it supports Test asset", async function () {
       const { registry, token } = await loadFixture(deployCoinPickerFixture);
       const data = await registry.getData();
-      const sa = data._supportedAssets[0];
+      const sa = data.supportedAssets[0];
       expect(sa.isVerified).to.be.true;
       expect(sa.asset).to.be.eq(token.address, "Asset mismatch");
       expect(sa.assetId).to.be.equal(0, `AssetId is ${sa.assetId} against 0`);
@@ -77,7 +77,7 @@ describe("Lock", function () {
       await token.connect(seller).approve(registry.address, QUANTITY);
       await registry.connect(seller).addItemToStoreFront(ids, ONE_GWEI);
       const data = await registry.getData();
-      const store = data._stores[ids];
+      const store = data.stores[ids];
       expect(store.priceLimit.toNumber()).to.be.equal(ONE_GWEI);
       expect(store.asset).to.be.equal(token.address);
       expect(store.metadata.name).to.be.equal(await token.name());
@@ -92,13 +92,13 @@ describe("Lock", function () {
       const amount = 20000;
       await registry.connect(buyer).createXWallet();
       const initData = await registry.getData();
-      const wallet = initData._xWallets[0].xWallet;
+      const wallet = initData.xWallets[0].xWallet;
       await cusd.connect(buyer).mint(wallet);
       await token.connect(seller).approve(registry.address, QUANTITY);
       await registry.connect(seller).addItemToStoreFront(ids, ONE_GWEI);
       await registry.connect(buyer).buy(ids, amount, offerPrice);
       const data = await registry.getData();
-      const store = data._stores[ids];
+      const store = data.stores[ids];
       expect(store.info.quantity).to.be.equal(QUANTITY - amount);
 
     })
@@ -117,20 +117,4 @@ describe("Lock", function () {
       //     .withArgs(lockedAmount, anyValue); // We accept any value as `when` arg
       // });
     });
-
-    // describe("Transfers", function () {
-    //   it("Should transfer the funds to the owner", async function () {
-    //     const { lock, unlockTime, lockedAmount, owner } = await loadFixture(
-    //       deployCoinPickerFixture
-    //     );
-
-    //     await time.increaseTo(unlockTime);
-
-    //     await expect(lock.withdraw()).to.changeEtherBalances(
-    //       [owner, lock],
-    //       [lockedAmount, -lockedAmount]
-    //     );
-    //   });
-    // });
-  // });
 });

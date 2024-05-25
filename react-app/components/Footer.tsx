@@ -1,7 +1,23 @@
-import Stack from "@mui/material/stack"
+import Stack from "@mui/material/Stack"
+import { SectionId } from "./apis/readContract";
 
 type Props = {
     className?: string
+}
+
+export const Navigator: React.FC<{scrollToSection: (arg: SectionId) => void, activeLink: SectionId}> = ({scrollToSection, activeLink}) => {
+  return (
+    <div className="w-full bg-orange-400 text-white flex mx-auto p-4 md:hidden items-center justify-between lg:px-8">
+      {
+        navigator.map(({text, icon}) => (
+          <Stack key={text} className={`place-items-center text-sm cursor-pointer ${activeLink === text && "text-stone-900 font-bold "}`} onClick={() => scrollToSection(text)}>
+            <span>{ icon }</span>
+            <h3>{ text }</h3>
+          </Stack>
+        ))
+      }
+    </div>
+  );
 }
 
 const links = [
@@ -34,16 +50,7 @@ const links = [
 
     return (
       <footer className="bg-gypsum mt-auto border-black border-t">
-        <div className="w-full flex mx-auto p-4 md:hidden items-center justify-between lg:px-8">
-          {
-            navigator.map(({text, icon}) => (
-              <Stack key={text} className={`place-items-center text-sm cursor-pointer ${activeLink === text && "text-green-500 font-bold "}`} onClick={() => scrollToSection(text)}>
-                <span>{ icon }</span>
-                <h3>{ text }</h3>
-              </Stack>
-            ))
-          }
-        </div>
+        <Navigator scrollToSection={scrollToSection} activeLink={activeLink} />
         <div className="hidden mx-auto max-w-7xl py-6 px-4 sm:px-6 md:flex md:items-center md:justify-between lg:px-8">
           <div className="flex justify-center space-x-6 md:order-2">
             {links.map((item) => (
@@ -61,7 +68,6 @@ const links = [
     )
   }
 
-  export type SectionId = "Home" | "Sell" | "Messages" | "Profile";
   export const navigator : Array<{text: SectionId, icon: React.ReactNode}> = [
     {
       text: "Home",

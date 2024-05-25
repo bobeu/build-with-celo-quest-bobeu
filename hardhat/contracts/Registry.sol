@@ -57,16 +57,23 @@ contract Registry is IRegistry, Ownable {
         _;
     }
 
+    modifier validateCategoryId(uint8 categoryId) {
+        require(categoryId < 10, "Unsupport asset id");
+        _;
+    }
+
     constructor(
         IERC20[] memory _supportedAssets,
+        uint8[] memory _categories,
         address _cUSD,
         address _feeReceiver
     ) Ownable(msg.sender) {
         require(_cUSD != address(0) && _feeReceiver != address(0), _cUSD == address(0)? "invalid CUSD address" : "Invalid FeeReceiver");
         cUSD = _cUSD;
         feeTo = _feeReceiver;
+        require(_categories.length == _supportedAssets.length, "Length mismatch");
         for (uint i = 0; i < _supportedAssets.length; i++) {
-            _setSupportedAsset(_supportedAssets[i]);
+            _setSupportedAsset(_supportedAssets[i], _categories[i]);
         }
     }
 
@@ -84,8 +91,9 @@ contract Registry is IRegistry, Ownable {
      */
     function _getAssetContract(
         uint assetId
-    ) internal view returns (IERC20 assetContract) {
+    ) internal view returns (IERC20 assetContract, Category category) {
         assetContract = supportedAssets[assetId].asset;
+        category = supportedAssets[assetId].category;
     }
 
     /**
@@ -99,13 +107,14 @@ contract Registry is IRegistry, Ownable {
      * @dev Internal function: Set a new supported asset
      * @param _supportedAssets : ERC20 standard asset to support.
      */
-    function _setSupportedAsset(IERC20 _supportedAssets) private {
+    function _setSupportedAsset(IERC20 _supportedAssets, uint8 categoryId) private {
         uint assetId = _generateAssetId();
         supportedAssets.push(
             SupportedAsset({
                 assetId: assetId,
                 asset: _supportedAssets,
-                isVerified: true
+                isVerified: true,
+                category: Category(categoryId)
             })
         );
     }
@@ -131,12 +140,16 @@ contract Registry is IRegistry, Ownable {
      * using 18 decimals.
      * Example: If the price for an item is 0.1cUSD, it should be written as 1e17 wei or equivalently 100000000000000000
      * otherwise, we will have a very inconsistent figures.
+     * 
+     * Note: Sellers are required to pay fees in CUSD as a prerequisite to adding asset to storeFront.
+     *       Seller should fund their onchain Wallet before making this call.
+     *       =========== THIS IS FUNCTION RESERVED TO BE IMPLEMENTED IN THE FUTURE==============
      */
     function addItemToStoreFront(
         uint assetId,
         uint224 priceLimit
     ) external validateAssetId(assetId) returns(bool) {
-        IERC20 assetContract = _getAssetContract(assetId);
+        (IERC20 assetContract, Category category) = _getAssetContract(assetId);
         address seller = _msgSender();
         address storeAddr = address(this);
         uint quantity = IERC20(assetContract).allowance(seller, storeAddr);
@@ -151,7 +164,8 @@ contract Registry is IRegistry, Ownable {
                 AssetMetadata(
                     IERC20Metadata(address(assetContract)).name(),
                     IERC20Metadata(address(assetContract)).symbol(),
-                    IERC20Metadata(address(assetContract)).decimals()
+                    IERC20Metadata(address(assetContract)).decimals(),
+                    category
                 ), 
                 StoreInfo(quantity, assetId, storeId)
             )
@@ -259,8 +273,8 @@ contract Registry is IRegistry, Ownable {
     /**
      * See _setSupportedAsset
      */
-    function setSupportedAsset(IERC20 _asset) public onlyOwner returns (bool) {
-        _setSupportedAsset(_asset);
+    function setSupportedAsset(IERC20 _asset, uint8 category) public onlyOwner returns (bool) {
+        _setSupportedAsset(_asset, category);
         return true;
     }
 
@@ -278,8 +292,10 @@ contract Registry is IRegistry, Ownable {
     /**
      * @dev Readonly: Return data from storage
      */
-    function getData() public view returns(StoreData[] memory _stores, SupportedAsset[] memory _supportedAssets, Wallet[] memory _xWallets) {
-        (_stores, _supportedAssets, _xWallets) = (storeFront, supportedAssets, xWallets); 
-        return (_stores, _supportedAssets, _xWallets); 
+    function getData() public view returns(Storage memory stg) {
+            stg.stores = storeFront;
+            stg.supportedAssets = supportedAssets;
+            stg.xWallets = xWallets;
+        return stg;
     }
 }

@@ -44,6 +44,11 @@ export const readDataAbi = [
                     "internalType": "uint8",
                     "name": "decimals",
                     "type": "uint8"
+                  },
+                  {
+                    "internalType": "enum IRegistry.Category",
+                    "name": "category",
+                    "type": "uint8"
                   }
                 ],
                 "internalType": "struct IRegistry.AssetMetadata",
@@ -93,6 +98,11 @@ export const readDataAbi = [
                 "internalType": "bool",
                 "name": "isVerified",
                 "type": "bool"
+              },
+              {
+                "internalType": "enum IRegistry.Category",
+                "name": "category",
+                "type": "uint8"
               }
             ],
             "internalType": "struct IRegistry.SupportedAsset[]",
@@ -151,6 +161,7 @@ export interface AssetMetadata {
   name: string;
   symbol: string;
   decimals: number;
+  category: number;
 }
 
 export interface StoreData {
@@ -165,6 +176,7 @@ export interface SupportedAsset {
   assetId: bigint;
   asset: string;
   isVerified: boolean;
+  category: number;
 }
 
 export interface Wallet {
@@ -172,125 +184,168 @@ export interface Wallet {
   xWallet: string;
 }
 
+export interface FooterProps {
+  scrollToSection: ScrollToSection;
+  activeLink: SectionId;
+}
+
+export interface HomeProps {
+  mockStorage: Storage; 
+  searchResult: string; 
+  toggleDrawer: ToggleDrawer; 
+  drawerState: DrawerState;
+  coinCategory: string;
+  contentType: ContentType; 
+  activeLink: SectionId; 
+  scrollToSection: ScrollToSection; 
+  items: StoreData[]; 
+  selectedItem: StoreData; 
+  addToCart: (arg: StoreData) => void;
+  removeFromCart: (arg: StoreData) => void;
+  handleButtonClick: (arg: string) => void;
+}
+
+export interface HeaderProps {
+  scrollToSection: ScrollToSection;
+  handleSearch: (arg: React.ChangeEvent<HTMLInputElement>) => void;
+  activeLink: SectionId;
+  toggleDrawer: ToggleDrawer;
+  items: StoreData[];
+}
+
+export enum CoinCategory { "MEME", "NFT", "DEFI", "GOVERNANCE", "RWA", "GAMING", "YIELD", "SPORT", "PRIVACY", "METAVERSE", "ALL" }
+
 export type StoreFront = Readonly<StoreData[]>;
 export type Supported = Readonly<SupportedAsset[]>;
 export type XWallet = Readonly<Wallet[]>;
-
+// export type CoinCategory = "Meme" | "NFT" | "DeFi" | "Governance" | "RWA" | "Gaming" | "Yield Optimizer" | "Sport" | "Privacy" | "Metaverse" | "";
+export type ContentType = "cartContent" | "selectedAsset" | "assetType" | "";
+export type Anchor = "top" | "left" | "bottom" | "right";
+export type SectionId = "Home" | "Sell" | "Messages" | "Profile";
+export interface ItemInfo {item: StoreData, index: number}
+export type ToggleDrawer = (anchor: Anchor, open: boolean, cType: ContentType, item?: StoreData) => (event: React.KeyboardEvent | React.MouseEvent) => void
+export type ScrollToSection = (arg: SectionId) => void; 
 export interface Storage {
-    stores: StoreFront;
-    supportedAssets: Supported;
-    xWallets: XWallet;
+  stores: StoreFront;
+  supportedAssets: Supported;
+  xWallets: XWallet;
 }
 
-console.log("1", toBigInt('1'));
-console.log("2", toBigInt('2'));
-console.log("3", toBigInt('3'));
+export interface DrawerState { 
+  top: boolean; 
+  left: boolean; 
+  bottom: boolean; 
+  right: boolean;
+}
+
 export class InitStorage {
   mockStorage: Storage;
+  coinCategory: string[];
 
   constructor() {
+    this.coinCategory = ["MEME", "NFT", "DEFI", "GOVERNANCE", "RWA", "GAMING", "YIELD", "SPORT", "PRIVACY", "METAVERSE", "ALL"];
     this.mockStorage = {
       stores: [
       {
         asset: zeroAddress,
         info: {assetId: 0n, quantity: 0n, storeId: 0n},
-        metadata: {decimals: 18, name: "Token0", symbol: "TNT0"},
+        metadata: {decimals: 18, name: "Token0", symbol: "TNT0", category: 0},
         priceLimit: 0n,
         seller: zeroAddress
       },
       {
         asset: zeroAddress,
         info: {assetId: 1n, quantity: 0n, storeId: 0n},
-        metadata: {decimals: 18, name: "Token1", symbol: "TNT1"},
+        metadata: {decimals: 18, name: "Token1", symbol: "TNT1", category: 1},
         priceLimit: 0n,
         seller: zeroAddress
       },
       {
         asset: zeroAddress,
         info: {assetId: 2n, quantity: 0n, storeId: 0n},
-        metadata: {decimals: 18, name: "Token2", symbol: "TNT2"},
+        metadata: {decimals: 18, name: "Token2", symbol: "TNT2", category: 2},
         priceLimit: 0n,
         seller: zeroAddress
       },
       {
         asset: zeroAddress,
         info: {assetId: 3n, quantity: 0n, storeId: 0n},
-        metadata: {decimals: 18, name: "Token3", symbol: "TNT3"},
+        metadata: {decimals: 18, name: "Token3", symbol: "TNT3", category: 3},
         priceLimit: 0n,
         seller: zeroAddress
       },
       {
         asset: zeroAddress,
         info: {assetId: 4n, quantity: 0n, storeId: 0n},
-        metadata: {decimals: 18, name: "Token4", symbol: "TNT4"},
+        metadata: {decimals: 18, name: "Token4", symbol: "TNT4", category: 4},
         priceLimit: 0n,
         seller: zeroAddress
       },
       {
         asset: zeroAddress,
         info: {assetId: 5n, quantity: 0n, storeId: 0n},
-        metadata: {decimals: 18, name: "Token5", symbol: "TNT5"},
+        metadata: {decimals: 18, name: "Token5", symbol: "TNT5", category: 5},
         priceLimit: 0n,
         seller: zeroAddress
       },
       {
         asset: zeroAddress,
         info: {assetId: 6n, quantity: 0n, storeId: 0n},
-        metadata: {decimals: 18, name: "Token6", symbol: "TNT6"},
+        metadata: {decimals: 18, name: "Token6", symbol: "TNT6", category: 6},
         priceLimit: 0n,
         seller: zeroAddress
       },
       {
         asset: zeroAddress,
         info: {assetId: 7n, quantity: 0n, storeId: 0n},
-        metadata: {decimals: 18, name: "Token7", symbol: "TNT7"},
+        metadata: {decimals: 18, name: "Token7", symbol: "TNT7", category: 7},
         priceLimit: 0n,
         seller: zeroAddress
       },
       {
         asset: zeroAddress,
         info: {assetId: 8n, quantity: 0n, storeId: 0n},
-        metadata: {decimals: 18, name: "Token8", symbol: "TNT8"},
+        metadata: {decimals: 18, name: "Token8", symbol: "TNT8", category: 8},
         priceLimit: 0n,
         seller: zeroAddress
       },
       {
         asset: zeroAddress,
         info: {assetId: 9n, quantity: 0n, storeId: 0n},
-        metadata: {decimals: 18, name: "Token9", symbol: "TNT9"},
+        metadata: {decimals: 18, name: "Token9", symbol: "TNT9", category: 9},
         priceLimit: 0n,
         seller: zeroAddress
       },
       {
         asset: zeroAddress,
         info: {assetId: 10n, quantity: 0n, storeId: 0n},
-        metadata: {decimals: 18, name: "Token10", symbol: "TNT10"},
+        metadata: {decimals: 18, name: "Token10", symbol: "TNT10", category: 8},
         priceLimit: 0n,
         seller: zeroAddress
       },
       {
         asset: zeroAddress,
         info: {assetId: 11n, quantity: 0n, storeId: 0n},
-        metadata: {decimals: 18, name: "Token11", symbol: "TNT11"},
+        metadata: {decimals: 18, name: "Token11", symbol: "TNT11", category: 7},
         priceLimit: 0n,
         seller: zeroAddress
       },
       {
         asset: zeroAddress,
         info: {assetId: 12n, quantity: 0n, storeId: 0n},
-        metadata: {decimals: 18, name: "Token12", symbol: "TNT12"},
+        metadata: {decimals: 18, name: "Token12", symbol: "TNT12", category: 6},
         priceLimit: 0n,
         seller: zeroAddress
       },
       {
         asset: zeroAddress,
         info: {assetId: 13n, quantity: 0n, storeId: 0n},
-        metadata: {decimals: 18, name: "Token13", symbol: "TNT13"},
+        metadata: {decimals: 18, name: "Token13", symbol: "TNT13", category: 5},
         priceLimit: 0n,
         seller: zeroAddress
       },
     ],
-      supportedAssets: [{asset: zeroAddress, assetId: 0n, isVerified: false}],
+      supportedAssets: [{asset: zeroAddress, assetId: 0n, isVerified: false, category: CoinCategory.GAMING}],
       xWallets: [{owner: zeroAddress, xWallet: zeroAddress}]
     }
   }
