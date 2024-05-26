@@ -92,7 +92,7 @@ export default function Home() {
         },
         {
             id: "Sell",
-            element: <Sell />
+            element: <Sell { ...{supportedAssets: storage.supportedAssets, } } />
         },
     ]
 

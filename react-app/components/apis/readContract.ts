@@ -103,6 +103,11 @@ export const readDataAbi = [
                 "internalType": "enum IRegistry.Category",
                 "name": "category",
                 "type": "uint8"
+              },
+              {
+                "internalType": "string",
+                "name": "name",
+                "type": "string"
               }
             ],
             "internalType": "struct IRegistry.SupportedAsset[]",
@@ -137,7 +142,7 @@ export const readDataAbi = [
   },
 ] as const;
 
-export const getData = async(args: {config: WagmiConfig, account: OxString, callback: Callback}) => {
+export const getData = async(args: {config: WagmiConfig, account: OxString, callback?: Callback}) => {
     const { config, account, callback } = args;
     const result : Storage = await readContract(config, {
         abi: readDataAbi,
@@ -146,7 +151,7 @@ export const getData = async(args: {config: WagmiConfig, account: OxString, call
         address
     });
     // return result;
-    callback({result});
+    callback?.({result});
 }
 
 export type Status = "Pending" | "Confirming" | "Confirmed";
@@ -174,9 +179,10 @@ export interface StoreData {
 
 export interface SupportedAsset {
   assetId: bigint;
-  asset: string;
+  asset: OxString;
   isVerified: boolean;
   category: number;
+  name: string;
 }
 
 export interface Wallet {
@@ -241,111 +247,24 @@ export interface DrawerState {
 export class InitStorage {
   mockStorage: Storage;
   coinCategory: string[];
+  mockSupportedAsset: {name: string, symbol: string}[];
 
   constructor() {
+    this.mockSupportedAsset = ([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] as const).map((i) => {
+      return {name: `Token${i}`, symbol: `TNT${i}`}
+    })
     this.coinCategory = ["MEME", "NFT", "DEFI", "GOVERNANCE", "RWA", "GAMING", "YIELD", "SPORT", "PRIVACY", "METAVERSE", "ALL"];
     this.mockStorage = {
-      stores: [
-      {
-        asset: zeroAddress,
-        info: {assetId: 0n, quantity: 0n, storeId: 0n},
-        metadata: {decimals: 18, name: "Token0", symbol: "TNT0", category: 0},
-        priceLimit: 0n,
-        seller: zeroAddress
-      },
-      {
-        asset: zeroAddress,
-        info: {assetId: 1n, quantity: 0n, storeId: 0n},
-        metadata: {decimals: 18, name: "Token1", symbol: "TNT1", category: 1},
-        priceLimit: 0n,
-        seller: zeroAddress
-      },
-      {
-        asset: zeroAddress,
-        info: {assetId: 2n, quantity: 0n, storeId: 0n},
-        metadata: {decimals: 18, name: "Token2", symbol: "TNT2", category: 2},
-        priceLimit: 0n,
-        seller: zeroAddress
-      },
-      {
-        asset: zeroAddress,
-        info: {assetId: 3n, quantity: 0n, storeId: 0n},
-        metadata: {decimals: 18, name: "Token3", symbol: "TNT3", category: 3},
-        priceLimit: 0n,
-        seller: zeroAddress
-      },
-      {
-        asset: zeroAddress,
-        info: {assetId: 4n, quantity: 0n, storeId: 0n},
-        metadata: {decimals: 18, name: "Token4", symbol: "TNT4", category: 4},
-        priceLimit: 0n,
-        seller: zeroAddress
-      },
-      {
-        asset: zeroAddress,
-        info: {assetId: 5n, quantity: 0n, storeId: 0n},
-        metadata: {decimals: 18, name: "Token5", symbol: "TNT5", category: 5},
-        priceLimit: 0n,
-        seller: zeroAddress
-      },
-      {
-        asset: zeroAddress,
-        info: {assetId: 6n, quantity: 0n, storeId: 0n},
-        metadata: {decimals: 18, name: "Token6", symbol: "TNT6", category: 6},
-        priceLimit: 0n,
-        seller: zeroAddress
-      },
-      {
-        asset: zeroAddress,
-        info: {assetId: 7n, quantity: 0n, storeId: 0n},
-        metadata: {decimals: 18, name: "Token7", symbol: "TNT7", category: 7},
-        priceLimit: 0n,
-        seller: zeroAddress
-      },
-      {
-        asset: zeroAddress,
-        info: {assetId: 8n, quantity: 0n, storeId: 0n},
-        metadata: {decimals: 18, name: "Token8", symbol: "TNT8", category: 8},
-        priceLimit: 0n,
-        seller: zeroAddress
-      },
-      {
-        asset: zeroAddress,
-        info: {assetId: 9n, quantity: 0n, storeId: 0n},
-        metadata: {decimals: 18, name: "Token9", symbol: "TNT9", category: 9},
-        priceLimit: 0n,
-        seller: zeroAddress
-      },
-      {
-        asset: zeroAddress,
-        info: {assetId: 10n, quantity: 0n, storeId: 0n},
-        metadata: {decimals: 18, name: "Token10", symbol: "TNT10", category: 8},
-        priceLimit: 0n,
-        seller: zeroAddress
-      },
-      {
-        asset: zeroAddress,
-        info: {assetId: 11n, quantity: 0n, storeId: 0n},
-        metadata: {decimals: 18, name: "Token11", symbol: "TNT11", category: 7},
-        priceLimit: 0n,
-        seller: zeroAddress
-      },
-      {
-        asset: zeroAddress,
-        info: {assetId: 12n, quantity: 0n, storeId: 0n},
-        metadata: {decimals: 18, name: "Token12", symbol: "TNT12", category: 6},
-        priceLimit: 0n,
-        seller: zeroAddress
-      },
-      {
-        asset: zeroAddress,
-        info: {assetId: 13n, quantity: 0n, storeId: 0n},
-        metadata: {decimals: 18, name: "Token13", symbol: "TNT13", category: 5},
-        priceLimit: 0n,
-        seller: zeroAddress
-      },
-    ],
-      supportedAssets: [{asset: zeroAddress, assetId: 0n, isVerified: false, category: CoinCategory.GAMING}],
+      stores: ([0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ] as const).map((i) => {
+        return {
+          asset: zeroAddress,
+          info: {assetId: toBigInt(i), quantity: 0n, storeId: 0n},
+          metadata: {decimals: 18, name: `Token${i}`, symbol: `TNT${i}`, category: i},
+          priceLimit: 0n,
+          seller: zeroAddress
+        }
+      }),
+      supportedAssets: [{asset: zeroAddress, assetId: 0n, isVerified: false, category: CoinCategory.GAMING, name: "TNT1"}],
       xWallets: [{owner: zeroAddress, xWallet: zeroAddress}]
     }
   }

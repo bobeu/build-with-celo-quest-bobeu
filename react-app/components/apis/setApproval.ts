@@ -31,17 +31,17 @@ const approvalAbi = [
   },
 ] as const;
 
-export async function setApproval(args: {config: Config, amount: bigint, contractAddress: OxString, approvalTo: OxString, callback: Callback, account: OxString}) {
-    const { config, callback, amount, contractAddress, approvalTo, account } = args;
-    callback({txStatus: "Pending"});
+export async function setApproval(args: {config: Config, amount: bigint, contractAddress: OxString, callback?: Callback, account: OxString}) {
+    const { config, callback, amount, contractAddress,  account } = args;
+    callback?.({txStatus: "Pending"});
     const { request } = await simulateContract(config, {
       address: contractAddress,
       account,
       abi: approvalAbi,
       functionName: "approve",
-      args: [approvalTo, amount],
+      args: [contractAddress, amount],
     });
-    callback({txStatus: "Confirming"});
+    callback?.({txStatus: "Confirming"});
     const hash = await writeContract(config, request ); 
     return await waitForConfirmation(config, hash, account, callback);
   }

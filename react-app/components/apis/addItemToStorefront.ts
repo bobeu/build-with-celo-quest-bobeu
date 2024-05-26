@@ -32,9 +32,9 @@ const addItemAbi = [
   },
 ] as const;
 
-export async function addItemToStorefront(args: {config: Config, priceLimit: bigint, assetId: bigint, callback: Callback, account: OxString}) {
+export async function addItemToStorefront(args: {config: Config, priceLimit: bigint, assetId: bigint, callback?: Callback, account: OxString}) {
   const { config, callback, assetId, priceLimit, account } = args;
-  callback({txStatus: "Pending"});
+  callback?.({txStatus: "Pending"});
   const { request } = await simulateContract(config, {
     address,
     account,
@@ -42,7 +42,7 @@ export async function addItemToStorefront(args: {config: Config, priceLimit: big
     functionName: "addItemToStoreFront",
     args: [assetId, priceLimit],
   });
-  callback({txStatus: "Confirming"});
+  callback?.({txStatus: "Confirming"});
   const hash = await writeContract(config, request ); 
   return await waitForConfirmation(config, hash, account, callback);
 }

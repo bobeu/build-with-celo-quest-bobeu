@@ -38,6 +38,7 @@ interface IRegistry {
         IERC20 asset;
         bool isVerified;
         Category category;
+        string name;
     }
 
     struct Wallet {

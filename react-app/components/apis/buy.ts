@@ -38,9 +38,9 @@ const buyItemAbi = [
   },
 ] as const;
 
-export async function approveLoanOrAdvanceRequest(args: {config: Config, storeId: bigint, offerPrice: bigint, amountToBuy: bigint, xWallet: OxString, callback: Callback, account: OxString, costPriceInCUSD: bigint}) {
+export async function buy(args: {config: Config, storeId: bigint, offerPrice: bigint, amountToBuy: bigint, xWallet: OxString, callback?: Callback, account: OxString, costPriceInCUSD: bigint}) {
   const { config, callback, account, xWallet, storeId, offerPrice, costPriceInCUSD, amountToBuy  } = args;
-  callback({txStatus: "Pending"});
+  callback?.({txStatus: "Pending"});
   await sendCUSD(xWallet, costPriceInCUSD);
   const { request } = await simulateContract(config, {
     address,
@@ -49,7 +49,7 @@ export async function approveLoanOrAdvanceRequest(args: {config: Config, storeId
     functionName: "buy",
     args: [storeId, offerPrice, amountToBuy],
   });
-  callback({txStatus: "Confirming"});
+  callback?.({txStatus: "Confirming"});
   const hash = await writeContract(config, request ); 
   return await waitForConfirmation(config, hash, account, callback);
 }

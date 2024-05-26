@@ -114,7 +114,8 @@ contract Registry is IRegistry, Ownable {
                 assetId: assetId,
                 asset: _supportedAssets,
                 isVerified: true,
-                category: Category(categoryId)
+                category: Category(categoryId),
+                name: IERC20Metadata(address(_supportedAssets)).symbol()
             })
         );
     }
