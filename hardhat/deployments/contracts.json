@@ -115,11 +115,514 @@
         }
       ]
     },
-    "TestToken": {
-      "address": "0xb5cce95d60E35aD593cA6f69467B2F8194B173b9",
+    "Registry": {
+      "address": "0xEc48D7Fca0eAdC791f325B7FB48BD9298636d57A",
       "abi": [
         {
+          "inputs": [
+            {
+              "internalType": "contract IERC20[]",
+              "name": "_supportedAssets",
+              "type": "address[]"
+            },
+            {
+              "internalType": "uint8[]",
+              "name": "_categories",
+              "type": "uint8[]"
+            },
+            {
+              "internalType": "address",
+              "name": "_cUSD",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "_feeReceiver",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "constructor"
+        },
+        {
           "inputs": [],
+          "name": "AssetTransferFailed",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "assetId",
+              "type": "uint256"
+            }
+          ],
+          "name": "InvalidAssetId",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "InvalidStoreId",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "NotPermitted",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "owner",
+              "type": "address"
+            }
+          ],
+          "name": "OwnableInvalidOwner",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "OwnableUnauthorizedAccount",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "TokenBalanceInStoreTooLow",
+          "type": "error"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "itemId",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "internalType": "contract IERC20",
+              "name": "asset",
+              "type": "address"
+            }
+          ],
+          "name": "ItemAdded",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "itemId",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "internalType": "contract IERC20",
+              "name": "asset",
+              "type": "address"
+            }
+          ],
+          "name": "ItemRemoved",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "previousOwner",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "newOwner",
+              "type": "address"
+            }
+          ],
+          "name": "OwnershipTransferred",
+          "type": "event"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "assetId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint224",
+              "name": "priceLimit",
+              "type": "uint224"
+            }
+          ],
+          "name": "addItemToStoreFront",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "storeId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint224",
+              "name": "amount",
+              "type": "uint224"
+            },
+            {
+              "internalType": "uint256",
+              "name": "offerPrice",
+              "type": "uint256"
+            }
+          ],
+          "name": "buy",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "cUSD",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "createXWallet",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "storeId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint224",
+              "name": "newPriceLimit",
+              "type": "uint224"
+            }
+          ],
+          "name": "editPriceLimit",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "assetId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint8",
+              "name": "value",
+              "type": "uint8"
+            }
+          ],
+          "name": "editSupportAsset",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "feeTo",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "getData",
+          "outputs": [
+            {
+              "components": [
+                {
+                  "components": [
+                    {
+                      "internalType": "address",
+                      "name": "asset",
+                      "type": "address"
+                    },
+                    {
+                      "internalType": "address",
+                      "name": "seller",
+                      "type": "address"
+                    },
+                    {
+                      "internalType": "uint224",
+                      "name": "priceLimit",
+                      "type": "uint224"
+                    },
+                    {
+                      "components": [
+                        {
+                          "internalType": "string",
+                          "name": "name",
+                          "type": "string"
+                        },
+                        {
+                          "internalType": "string",
+                          "name": "symbol",
+                          "type": "string"
+                        },
+                        {
+                          "internalType": "uint8",
+                          "name": "decimals",
+                          "type": "uint8"
+                        },
+                        {
+                          "internalType": "enum IRegistry.Category",
+                          "name": "category",
+                          "type": "uint8"
+                        }
+                      ],
+                      "internalType": "struct IRegistry.AssetMetadata",
+                      "name": "metadata",
+                      "type": "tuple"
+                    },
+                    {
+                      "components": [
+                        {
+                          "internalType": "uint256",
+                          "name": "quantity",
+                          "type": "uint256"
+                        },
+                        {
+                          "internalType": "uint256",
+                          "name": "assetId",
+                          "type": "uint256"
+                        },
+                        {
+                          "internalType": "uint256",
+                          "name": "storeId",
+                          "type": "uint256"
+                        }
+                      ],
+                      "internalType": "struct IRegistry.StoreInfo",
+                      "name": "info",
+                      "type": "tuple"
+                    }
+                  ],
+                  "internalType": "struct IRegistry.StoreData[]",
+                  "name": "stores",
+                  "type": "tuple[]"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "uint256",
+                      "name": "assetId",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "contract IERC20",
+                      "name": "asset",
+                      "type": "address"
+                    },
+                    {
+                      "internalType": "bool",
+                      "name": "isVerified",
+                      "type": "bool"
+                    },
+                    {
+                      "internalType": "enum IRegistry.Category",
+                      "name": "category",
+                      "type": "uint8"
+                    },
+                    {
+                      "internalType": "string",
+                      "name": "name",
+                      "type": "string"
+                    }
+                  ],
+                  "internalType": "struct IRegistry.SupportedAsset[]",
+                  "name": "supportedAssets",
+                  "type": "tuple[]"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "address",
+                      "name": "owner",
+                      "type": "address"
+                    },
+                    {
+                      "internalType": "address",
+                      "name": "xWallet",
+                      "type": "address"
+                    }
+                  ],
+                  "internalType": "struct IRegistry.Wallet[]",
+                  "name": "xWallets",
+                  "type": "tuple[]"
+                }
+              ],
+              "internalType": "struct IRegistry.Storage",
+              "name": "stg",
+              "type": "tuple"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "owner",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "renounceOwnership",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "contract IERC20",
+              "name": "_asset",
+              "type": "address"
+            },
+            {
+              "internalType": "uint8",
+              "name": "category",
+              "type": "uint8"
+            }
+          ],
+          "name": "setSupportedAsset",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "newOwner",
+              "type": "address"
+            }
+          ],
+          "name": "transferOwnership",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "assetId",
+              "type": "uint256"
+            }
+          ],
+          "name": "unSupportAsset",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        }
+      ]
+    },
+    "TestToken": {
+      "address": "0x9F37299Ee967B0bC9BCAA803E7FC23f71Faad029",
+      "abi": [
+        {
+          "inputs": [
+            {
+              "internalType": "string",
+              "name": "tokenName",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "tokenSymbol",
+              "type": "string"
+            }
+          ],
           "stateMutability": "nonpayable",
           "type": "constructor"
         },
@@ -453,473 +956,6 @@
             }
           ],
           "name": "transferFrom",
-          "outputs": [
-            {
-              "internalType": "bool",
-              "name": "",
-              "type": "bool"
-            }
-          ],
-          "stateMutability": "nonpayable",
-          "type": "function"
-        }
-      ]
-    },
-    "Registry": {
-      "address": "0x9fF548d6CF286c5135248AA778e799ec3A7D5350",
-      "abi": [
-        {
-          "inputs": [
-            {
-              "internalType": "contract IERC20[]",
-              "name": "_supportedAssets",
-              "type": "address[]"
-            },
-            {
-              "internalType": "address",
-              "name": "_cUSD",
-              "type": "address"
-            },
-            {
-              "internalType": "address",
-              "name": "_feeReceiver",
-              "type": "address"
-            }
-          ],
-          "stateMutability": "nonpayable",
-          "type": "constructor"
-        },
-        {
-          "inputs": [],
-          "name": "AssetTransferFailed",
-          "type": "error"
-        },
-        {
-          "inputs": [
-            {
-              "internalType": "uint256",
-              "name": "assetId",
-              "type": "uint256"
-            }
-          ],
-          "name": "InvalidAssetId",
-          "type": "error"
-        },
-        {
-          "inputs": [],
-          "name": "InvalidStoreId",
-          "type": "error"
-        },
-        {
-          "inputs": [],
-          "name": "NotPermitted",
-          "type": "error"
-        },
-        {
-          "inputs": [
-            {
-              "internalType": "address",
-              "name": "owner",
-              "type": "address"
-            }
-          ],
-          "name": "OwnableInvalidOwner",
-          "type": "error"
-        },
-        {
-          "inputs": [
-            {
-              "internalType": "address",
-              "name": "account",
-              "type": "address"
-            }
-          ],
-          "name": "OwnableUnauthorizedAccount",
-          "type": "error"
-        },
-        {
-          "inputs": [],
-          "name": "TokenBalanceInStoreTooLow",
-          "type": "error"
-        },
-        {
-          "anonymous": false,
-          "inputs": [
-            {
-              "indexed": false,
-              "internalType": "uint256",
-              "name": "itemId",
-              "type": "uint256"
-            },
-            {
-              "indexed": false,
-              "internalType": "contract IERC20",
-              "name": "asset",
-              "type": "address"
-            }
-          ],
-          "name": "ItemAdded",
-          "type": "event"
-        },
-        {
-          "anonymous": false,
-          "inputs": [
-            {
-              "indexed": false,
-              "internalType": "uint256",
-              "name": "itemId",
-              "type": "uint256"
-            },
-            {
-              "indexed": false,
-              "internalType": "contract IERC20",
-              "name": "asset",
-              "type": "address"
-            }
-          ],
-          "name": "ItemRemoved",
-          "type": "event"
-        },
-        {
-          "anonymous": false,
-          "inputs": [
-            {
-              "indexed": true,
-              "internalType": "address",
-              "name": "previousOwner",
-              "type": "address"
-            },
-            {
-              "indexed": true,
-              "internalType": "address",
-              "name": "newOwner",
-              "type": "address"
-            }
-          ],
-          "name": "OwnershipTransferred",
-          "type": "event"
-        },
-        {
-          "inputs": [
-            {
-              "internalType": "uint256",
-              "name": "assetId",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint224",
-              "name": "priceLimit",
-              "type": "uint224"
-            }
-          ],
-          "name": "addItemToStoreFront",
-          "outputs": [
-            {
-              "internalType": "bool",
-              "name": "",
-              "type": "bool"
-            }
-          ],
-          "stateMutability": "nonpayable",
-          "type": "function"
-        },
-        {
-          "inputs": [
-            {
-              "internalType": "uint256",
-              "name": "storeId",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint224",
-              "name": "amount",
-              "type": "uint224"
-            },
-            {
-              "internalType": "uint256",
-              "name": "offerPrice",
-              "type": "uint256"
-            }
-          ],
-          "name": "buy",
-          "outputs": [
-            {
-              "internalType": "bool",
-              "name": "",
-              "type": "bool"
-            }
-          ],
-          "stateMutability": "nonpayable",
-          "type": "function"
-        },
-        {
-          "inputs": [],
-          "name": "cUSD",
-          "outputs": [
-            {
-              "internalType": "address",
-              "name": "",
-              "type": "address"
-            }
-          ],
-          "stateMutability": "view",
-          "type": "function"
-        },
-        {
-          "inputs": [],
-          "name": "createXWallet",
-          "outputs": [
-            {
-              "internalType": "bool",
-              "name": "",
-              "type": "bool"
-            }
-          ],
-          "stateMutability": "nonpayable",
-          "type": "function"
-        },
-        {
-          "inputs": [
-            {
-              "internalType": "uint256",
-              "name": "storeId",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint224",
-              "name": "newPriceLimit",
-              "type": "uint224"
-            }
-          ],
-          "name": "editPriceLimit",
-          "outputs": [
-            {
-              "internalType": "bool",
-              "name": "",
-              "type": "bool"
-            }
-          ],
-          "stateMutability": "nonpayable",
-          "type": "function"
-        },
-        {
-          "inputs": [
-            {
-              "internalType": "uint256",
-              "name": "assetId",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint8",
-              "name": "value",
-              "type": "uint8"
-            }
-          ],
-          "name": "editSupportAsset",
-          "outputs": [
-            {
-              "internalType": "bool",
-              "name": "",
-              "type": "bool"
-            }
-          ],
-          "stateMutability": "nonpayable",
-          "type": "function"
-        },
-        {
-          "inputs": [],
-          "name": "feeTo",
-          "outputs": [
-            {
-              "internalType": "address",
-              "name": "",
-              "type": "address"
-            }
-          ],
-          "stateMutability": "view",
-          "type": "function"
-        },
-        {
-          "inputs": [],
-          "name": "getData",
-          "outputs": [
-            {
-              "components": [
-                {
-                  "components": [
-                    {
-                      "internalType": "address",
-                      "name": "asset",
-                      "type": "address"
-                    },
-                    {
-                      "internalType": "address",
-                      "name": "seller",
-                      "type": "address"
-                    },
-                    {
-                      "internalType": "uint224",
-                      "name": "priceLimit",
-                      "type": "uint224"
-                    },
-                    {
-                      "components": [
-                        {
-                          "internalType": "string",
-                          "name": "name",
-                          "type": "string"
-                        },
-                        {
-                          "internalType": "string",
-                          "name": "symbol",
-                          "type": "string"
-                        },
-                        {
-                          "internalType": "uint8",
-                          "name": "decimals",
-                          "type": "uint8"
-                        }
-                      ],
-                      "internalType": "struct IRegistry.AssetMetadata",
-                      "name": "metadata",
-                      "type": "tuple"
-                    },
-                    {
-                      "components": [
-                        {
-                          "internalType": "uint256",
-                          "name": "quantity",
-                          "type": "uint256"
-                        },
-                        {
-                          "internalType": "uint256",
-                          "name": "assetId",
-                          "type": "uint256"
-                        },
-                        {
-                          "internalType": "uint256",
-                          "name": "storeId",
-                          "type": "uint256"
-                        }
-                      ],
-                      "internalType": "struct IRegistry.StoreInfo",
-                      "name": "info",
-                      "type": "tuple"
-                    }
-                  ],
-                  "internalType": "struct IRegistry.StoreData[]",
-                  "name": "stores",
-                  "type": "tuple[]"
-                },
-                {
-                  "components": [
-                    {
-                      "internalType": "uint256",
-                      "name": "assetId",
-                      "type": "uint256"
-                    },
-                    {
-                      "internalType": "contract IERC20",
-                      "name": "asset",
-                      "type": "address"
-                    },
-                    {
-                      "internalType": "bool",
-                      "name": "isVerified",
-                      "type": "bool"
-                    }
-                  ],
-                  "internalType": "struct IRegistry.SupportedAsset[]",
-                  "name": "supportedAssets",
-                  "type": "tuple[]"
-                },
-                {
-                  "components": [
-                    {
-                      "internalType": "address",
-                      "name": "owner",
-                      "type": "address"
-                    },
-                    {
-                      "internalType": "address",
-                      "name": "xWallet",
-                      "type": "address"
-                    }
-                  ],
-                  "internalType": "struct IRegistry.Wallet[]",
-                  "name": "xWallets",
-                  "type": "tuple[]"
-                }
-              ],
-              "internalType": "struct IRegistry.Storage",
-              "name": "stg",
-              "type": "tuple"
-            }
-          ],
-          "stateMutability": "view",
-          "type": "function"
-        },
-        {
-          "inputs": [],
-          "name": "owner",
-          "outputs": [
-            {
-              "internalType": "address",
-              "name": "",
-              "type": "address"
-            }
-          ],
-          "stateMutability": "view",
-          "type": "function"
-        },
-        {
-          "inputs": [],
-          "name": "renounceOwnership",
-          "outputs": [],
-          "stateMutability": "nonpayable",
-          "type": "function"
-        },
-        {
-          "inputs": [
-            {
-              "internalType": "contract IERC20",
-              "name": "_asset",
-              "type": "address"
-            }
-          ],
-          "name": "setSupportedAsset",
-          "outputs": [
-            {
-              "internalType": "bool",
-              "name": "",
-              "type": "bool"
-            }
-          ],
-          "stateMutability": "nonpayable",
-          "type": "function"
-        },
-        {
-          "inputs": [
-            {
-              "internalType": "address",
-              "name": "newOwner",
-              "type": "address"
-            }
-          ],
-          "name": "transferOwnership",
-          "outputs": [],
-          "stateMutability": "nonpayable",
-          "type": "function"
-        },
-        {
-          "inputs": [
-            {
-              "internalType": "uint256",
-              "name": "assetId",
-              "type": "uint256"
-            }
-          ],
-          "name": "unSupportAsset",
           "outputs": [
             {
               "internalType": "bool",

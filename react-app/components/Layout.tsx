@@ -1,4 +1,4 @@
-import { FC, ReactNode } from "react";
+import React, { FC, ReactNode } from "react";
 import Footer from "./Footer";
 import Header from "./Header";
 import Container from "@mui/material/Container";
@@ -11,15 +11,15 @@ interface Props {
 }
 const Layout: FC<Props> = ({ children, headerProps, footerProps }) => {
     return (
-        <>
-            <div className="bg-gypsum overflow-hidden flex flex-col min-h-screen">
+        <React.Fragment>
+            <div className="bg-gypsum overflow-auto flex flex-col h-screen">
                 <Header { ...headerProps } />
-                <Container maxWidth="lg" className="mx-auto py-4 bg-green-50 w-full p-1 rounded-lg h-full ">
+                <Container maxWidth="lg" className="mx-auto py-4 bg-green-50 h-full ">
                     {children}
                 </Container>
                 <Footer { ...footerProps } />
             </div>
-        </>
+        </React.Fragment>
     );
 };
 

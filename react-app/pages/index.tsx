@@ -1,19 +1,23 @@
 import React from "react";
-import { useAccount } from "wagmi";
+import { useAccount, useConfig } from "wagmi";
 import Container from "@mui/material/Container";
+import Box from "@mui/material/Box";
 import { Home as HomePage } from "@/components/Home";
-import { InitStorage } from "@/components/apis/readContract";
-import type { Storage, StoreData, SectionId, Anchor, ItemInfo, ContentType, CoinCategory } from "@/components/apis/readContract";
+import { InitStorage, getData } from "@/components/apis/readContract";
+import type { Storage, StoreData, SectionId, Anchor, ItemInfo, ContentType, CoinCategory, CartItem } from "@/components/apis/readContract";
 import Layout from "@/components/Layout";
 import Notification from "@/components/Notification";
 import Sell from "@/components/Sell";
+import Messages from "@/components/Messages";
+import { OxString } from "@/components/apis/contractAddress";
+import { zeroAddress } from "viem";
 
 export default function Home() {
-    const [ userAddress, setUserAddress] = React.useState<string>("");
-    // const [ , refresh] = React.useState<number>();
+    const [ userAddress, setUserAddress] = React.useState<OxString>(zeroAddress);
+    const [ sellerToMesage, setSeller] = React.useState<OxString | string>(zeroAddress);
     const [ message, setMessage] = React.useState<string>("");
     const [ activeLink, setActiveLink ] = React.useState<SectionId>("Home");
-    const [ items, setItems ] = React.useState<StoreData[]>([]);
+    const [ items, setItems ] = React.useState<CartItem[]>([]);
     const [ drawerState, setState ] = React.useState<{ top: boolean; left: boolean; bottom: boolean; right: boolean;}>({ top: false, left: false, bottom: false, right: false,});
     const [ contentType, setContentType] = React.useState<ContentType>("");
     const [ selectedItem, setSelectedItem] = React.useState<StoreData>(new InitStorage().mockStorage.stores[0]);
@@ -21,9 +25,16 @@ export default function Home() {
     const [ coinCategory, setCoinCategory ] = React.useState<string>("");
     const [ storage, setStorage ] = React.useState<Storage>(new InitStorage().mockStorage);
     const { address, isConnected } = useAccount();
+    const config = useConfig();
     
-    const scrollToSection = (sectionId: SectionId) => {
+    const scrollToSection = (sectionId: SectionId, seller?: OxString | string) => {
         setActiveLink(sectionId);
+        if(sectionId === "Messages") {
+            setState({ ...drawerState, ["bottom"]: false });
+            if(seller) {
+                setSeller(seller);
+            }
+        }
         // const sectionElement = document.getElementById(sectionId);
         // const offset = 128;
         // if (sectionElement) {
@@ -36,17 +47,18 @@ export default function Home() {
         // }
     };
 
-    const addToCart = (item: StoreData) => {
+    const addToCart = (item: CartItem) => {
         if(!items.includes(item)) {
             setItems((prev) => [...prev, item]);
-            setMessage(`${item.metadata.symbol} added to the list`);
+            setMessage(`${item.item.metadata.symbol} added to the list`);
         }
+        setState({ ...drawerState, ["bottom"]: false });
     }
 
-    const removeFromCart = (item: StoreData) => {
-        const filtered = items?.filter((j) => j.metadata.name !== item.metadata.name);
+    const removeFromCart = (item: CartItem) => {
+        const filtered = items?.filter((j) => j.item.metadata.name !== item.item.metadata.name);
         setItems(filtered);
-        setMessage(`${item.metadata.symbol} removed from the list`);
+        setMessage(`${item.item.metadata.symbol} removed from the list`);
     }
 
     const handleButtonClick = (arg: string) => {
@@ -80,9 +92,25 @@ export default function Home() {
     };
 
     React.useEffect(() => {
+        const ab = new AbortController();
+
         if (isConnected && address) {
             setUserAddress(address);
+            const read = async() => {
+                await getData({
+                    config, 
+                    account: address,     
+                    callback: (result) => {
+                        if(result?.result) {
+                            console.log("Result", result);
+                            setStorage(result.result);
+                        }
+                    }
+                })
+            }
+            read();
         }
+        return() => { ab.abort(); }
     }, [address, isConnected]);
 
     const sections : {id: SectionId, element: JSX.Element}[] = [
@@ -94,6 +122,10 @@ export default function Home() {
             id: "Sell",
             element: <Sell { ...{supportedAssets: storage.supportedAssets, } } />
         },
+        {
+            id: "Messages",
+            element: <Messages {...{sellerToMesage}} />
+        },
     ]
 
     return (
@@ -101,7 +133,7 @@ export default function Home() {
             footerProps={{activeLink, scrollToSection}}
             headerProps={{activeLink, items, scrollToSection, toggleDrawer, handleSearch }}
         >
-            <Container maxWidth={"lg"}>
+            <Container >
                 {
                     sections.map(({ id, element }) => (
                         <section key={id} id={id} hidden={activeLink !== id}>

@@ -1,15 +1,14 @@
+import React from "react";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Divider from "@mui/material/Divider";
-import React from "react";
-import { CoinCategory, InitStorage, StoreFront, Supported } from "../apis/readContract";
+import { CoinCategory, Supported, getBalance } from "../apis/readContract";
 import { setApproval } from "../apis/setApproval";
 import { useAccount, useConfig } from "wagmi";
 import { OxString, formatAddr } from "../apis/contractAddress";
 import { toBigInt } from "@/utilities";
 import { addItemToStorefront } from "../apis/addItemToStorefront";
-
-// const supportedAssets = new InitStorage().mockSupportedAsset;
+import { ethers } from "ethers";
 
 export default function Sell({supportedAssets}: {supportedAssets: Supported}) {
     const [ selectedAsset, setSelected ] = React.useState<{name: string, assetContract: OxString, assetId: bigint}>();
@@ -18,9 +17,19 @@ export default function Sell({supportedAssets}: {supportedAssets: Supported}) {
     const [ priceLimit, setPriceLimit ] = React.useState<string>();
     const [ approvalDone, setApprovalDone ] = React.useState<boolean>(false);
     const [ loading, setLoading ] = React.useState<boolean>(false);
+    const [ balance, setBalance ] = React.useState<string>("0");
 
-    const { address } = useAccount();
+    const { address : account} = useAccount();
     const config = useConfig();
+
+    const handleSelectedAssetClick = async(option: {name: string, assetContract: OxString, assetId: bigint}) => {
+        const { name, assetContract, assetId } = option;
+        if(!account) return;
+        setSelected({name, assetContract, assetId});
+        setDisplay(false);
+        await getBalance({config, account, contractAddr: assetContract})
+            .then((result) => setBalance(ethers.utils.parseUnits(result.toString(), "ether").toString()));
+    }
 
     const handleChangeEvent = (e: React.ChangeEvent<HTMLInputElement>, tag: string) => {
         e.preventDefault();
@@ -41,11 +50,12 @@ export default function Sell({supportedAssets}: {supportedAssets: Supported}) {
     const handleApprovalRequest = async() => {
         if(!selectedAsset?.assetContract) return;
         if(!quantity) return;
+        if(!account) return;
         // if(!priceLimit) return;
         setLoading(true);
         await setApproval({
             config,
-            account: formatAddr(address),
+            account,
             amount: toBigInt(quantity),
             // callback,
             contractAddress: selectedAsset?.assetContract
@@ -59,10 +69,11 @@ export default function Sell({supportedAssets}: {supportedAssets: Supported}) {
     const handleCreateAd = async() => {
         if(!priceLimit) return;
         if(!selectedAsset?.assetId) return;
+        if(!account) return;
         setLoading(true);
         await addItemToStorefront({
             config,
-            account: formatAddr(address),
+            account,
             priceLimit: toBigInt(priceLimit),
             assetId: selectedAsset?.assetId,
 
@@ -74,8 +85,9 @@ export default function Sell({supportedAssets}: {supportedAssets: Supported}) {
 
     return(
         <Box className="space-y-4">
-            <Box>
+            <Box className="flex justify-between items-center">
                 <h3>Create your Ad</h3>
+                <h3>{`Bal: ${balance} `}</h3>
             </Box>
             <Divider />
             <Box className="max-h-[200px] overflow-auto ">
@@ -90,10 +102,7 @@ export default function Sell({supportedAssets}: {supportedAssets: Supported}) {
                 <div className="w-full" hidden={!displayAsset} >
                     {
                         supportedAssets?.map(({name, category, asset, assetId}, i) => (
-                            <button key={i} onClick={() => {
-                                setSelected({name, assetContract: asset, assetId});
-                                setDisplay(false);
-                            }} className="w-full flex justify-between items-center bg-white hover:bg-stone-300 text-xs p-4 border-2 border-stone-200 font-serif"
+                            <button key={i} onClick={async() => await handleSelectedAssetClick({name, assetContract: asset, assetId})} className="w-full flex justify-between items-center bg-white hover:bg-stone-300 text-xs p-4 border-2 border-stone-200 font-serif"
                             >
                                 <h3>{ name }</h3>
                                 <h3>{ CoinCategory[category] }</h3>
@@ -102,7 +111,7 @@ export default function Sell({supportedAssets}: {supportedAssets: Supported}) {
                     }
                 </div>
             </Box>
-            <Box>
+            <Box className="place-items-center">
                 <Stack className="w-full space-y-2">
                     <h3>{"Quantity: "}</h3>
                     <div className="flex justify-between items-center gap-1">
