@@ -1,6 +1,4 @@
 import Box from "@mui/material/Box";
-import Stack from "@mui/material/Stack";
-import Divider from "@mui/material/Divider";
 import React from "react";
 import { OxString } from "../apis/contractAddress";
 

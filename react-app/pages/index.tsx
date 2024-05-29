@@ -23,7 +23,9 @@ export default function Home() {
     const [ selectedItem, setSelectedItem] = React.useState<StoreData>(new InitStorage().mockStorage.stores[0]);
     const [ searchResult, setSearchResult ] = React.useState<string>("");
     const [ coinCategory, setCoinCategory ] = React.useState<string>("");
+    const [ signal, setSignal ] = React.useState<number>(0);
     const [ storage, setStorage ] = React.useState<Storage>(new InitStorage().mockStorage);
+    
     const { address, isConnected } = useAccount();
     const config = useConfig();
     
@@ -47,6 +49,8 @@ export default function Home() {
         // }
     };
 
+    const refresh = () => setSignal((p) => p + 1);
+
     const addToCart = (item: CartItem) => {
         if(!items.includes(item)) {
             setItems((prev) => [...prev, item]);
@@ -56,7 +60,8 @@ export default function Home() {
     }
 
     const removeFromCart = (item: CartItem) => {
-        const filtered = items?.filter((j) => j.item.metadata.name !== item.item.metadata.name);
+        const index = items.indexOf(item);
+        const filtered = items?.filter((j, i) => i !== index);
         setItems(filtered);
         setMessage(`${item.item.metadata.symbol} removed from the list`);
     }
@@ -111,12 +116,12 @@ export default function Home() {
             read();
         }
         return() => { ab.abort(); }
-    }, [address, isConnected]);
+    }, [address, isConnected, signal]);
 
     const sections : {id: SectionId, element: JSX.Element}[] = [
         {
             id: "Home",
-            element: <HomePage { ...{activeLink, addToCart, drawerState, contentType, items, mockStorage: storage, scrollToSection, selectedItem, toggleDrawer, searchResult, removeFromCart, handleButtonClick}} coinCategory={coinCategory} />
+            element: <HomePage { ...{activeLink, refresh, addToCart, drawerState, contentType, items, mockStorage: storage, scrollToSection, selectedItem, toggleDrawer, searchResult, removeFromCart, handleButtonClick}} coinCategory={coinCategory} />
         },
         {
             id: "Sell",

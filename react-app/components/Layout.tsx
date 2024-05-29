@@ -2,14 +2,14 @@ import React, { FC, ReactNode } from "react";
 import Footer from "./Footer";
 import Header from "./Header";
 import Container from "@mui/material/Container";
-import { FooterProps, HeaderProps } from "./apis/readContract";
+import type { FooterProps, HeaderProps } from "./apis/readContract";
 
-interface Props {
+interface LayoutProps {
     children: ReactNode;
     headerProps: HeaderProps;
     footerProps: FooterProps;
 }
-const Layout: FC<Props> = ({ children, headerProps, footerProps }) => {
+const Layout: FC<LayoutProps> = ({ children, headerProps, footerProps }) => {
     return (
         <React.Fragment>
             <div className="bg-gypsum overflow-auto flex flex-col h-screen">

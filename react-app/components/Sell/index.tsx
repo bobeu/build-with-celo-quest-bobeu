@@ -5,8 +5,8 @@ import Divider from "@mui/material/Divider";
 import { CoinCategory, Supported, getBalance } from "../apis/readContract";
 import { setApproval } from "../apis/setApproval";
 import { useAccount, useConfig } from "wagmi";
-import { OxString, formatAddr } from "../apis/contractAddress";
-import { toBigInt } from "@/utilities";
+import { OxString } from "../apis/contractAddress";
+import { bn, powr, toBigInt } from "@/utilities";
 import { addItemToStorefront } from "../apis/addItemToStorefront";
 import { ethers } from "ethers";
 
@@ -17,18 +17,18 @@ export default function Sell({supportedAssets}: {supportedAssets: Supported}) {
     const [ priceLimit, setPriceLimit ] = React.useState<string>();
     const [ approvalDone, setApprovalDone ] = React.useState<boolean>(false);
     const [ loading, setLoading ] = React.useState<boolean>(false);
-    const [ balance, setBalance ] = React.useState<string>("0");
+    const [ balance, setBalance ] = React.useState<ethers.BigNumber>(ethers.BigNumber.from(0));
 
     const { address : account} = useAccount();
     const config = useConfig();
 
     const handleSelectedAssetClick = async(option: {name: string, assetContract: OxString, assetId: bigint}) => {
         const { name, assetContract, assetId } = option;
-        if(!account) return;
         setSelected({name, assetContract, assetId});
         setDisplay(false);
+        if(!account) return;
         await getBalance({config, account, contractAddr: assetContract})
-            .then((result) => setBalance(ethers.utils.parseUnits(result.toString(), "ether").toString()));
+            .then((result) => setBalance(bn(result)));
     }
 
     const handleChangeEvent = (e: React.ChangeEvent<HTMLInputElement>, tag: string) => {
@@ -51,13 +51,13 @@ export default function Sell({supportedAssets}: {supportedAssets: Supported}) {
         if(!selectedAsset?.assetContract) return;
         if(!quantity) return;
         if(!account) return;
-        // if(!priceLimit) return;
+        const amtToSell = powr(quantity, 1, 18);
+        if(balance.lt(amtToSell)) return;
         setLoading(true);
         await setApproval({
             config,
             account,
-            amount: toBigInt(quantity),
-            // callback,
+            amount: amtToSell.toBigInt(),
             contractAddress: selectedAsset?.assetContract
 
         }).then(() => {
@@ -87,7 +87,7 @@ export default function Sell({supportedAssets}: {supportedAssets: Supported}) {
         <Box className="space-y-4">
             <Box className="flex justify-between items-center">
                 <h3>Create your Ad</h3>
-                <h3>{`Bal: ${balance} `}</h3>
+                <h3>{`Bal: ${ethers.utils.parseUnits(balance.toString(), "ether").toString()} `}</h3>
             </Box>
             <Divider />
             <Box className="max-h-[200px] overflow-auto ">

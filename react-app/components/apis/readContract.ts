@@ -2,6 +2,7 @@ import { zeroAddress } from "viem";
 import { OxString, WagmiConfig, contractAddress } from "./contractAddress";
 import { readContract } from "wagmi/actions";
 import { toBigInt } from "@/utilities";
+import { getCUSD } from "./sendCUSD";
 
 const address = contractAddress();
 export const readDataAbi = [
@@ -176,13 +177,12 @@ export const getData = async(args: {config: WagmiConfig, account: OxString, call
     callback?.({result});
 }
 
-export const getBalance = async(args: {config: WagmiConfig, account: OxString, contractAddr: OxString }) => {
+export const getBalance = async(args: {config: WagmiConfig, account: OxString, contractAddr?: OxString }) => {
   const { config, account, contractAddr } = args;
     return await readContract(config, {
         abi: getBalanceAbi,
         functionName: "balanceOf",
-        account,
-        address: contractAddr,
+        address: contractAddr? contractAddr : getCUSD(),
         args: [account]
     });
 }
@@ -222,8 +222,8 @@ export interface SupportedAsset {
 }
 
 export interface Wallet {
-  owner: string;
-  xWallet: string;
+  owner: OxString;
+  xWallet: OxString;
 }
 
 export interface FooterProps {
@@ -232,14 +232,17 @@ export interface FooterProps {
 }
 
 export interface CartItem {
+  storeId: bigint;
   amountToBuy: bigint;
   offerPrice: bigint;
   item: StoreData;
+  costPriceInCUSD: bigint;
 }
 
 export interface HomeProps {
   mockStorage: Storage; 
   searchResult: string; 
+  refresh: () => void;
   toggleDrawer: ToggleDrawer; 
   drawerState: DrawerState;
   coinCategory: string;
@@ -262,7 +265,6 @@ export interface HeaderProps {
 }
 
 export enum CoinCategory { "MEME", "NFT", "DEFI", "GOVERNANCE", "RWA", "GAMING", "YIELD", "SPORT", "PRIVACY", "METAVERSE", "ALL" }
-
 export type StoreFront = Readonly<StoreData[]>;
 export type Supported = Readonly<SupportedAsset[]>;
 export type XWallet = Readonly<Wallet[]>;

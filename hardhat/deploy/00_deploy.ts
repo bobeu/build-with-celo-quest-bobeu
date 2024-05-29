@@ -1,6 +1,8 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
+import { config } from "dotenv";
 
+config()
 export const isTestnet = process.env.CONTEXT === "TESTNET";
 console.log("isTEstnet: ", isTestnet);
 
