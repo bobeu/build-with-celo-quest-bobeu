@@ -83,7 +83,6 @@ export default function Sell({supportedAssets, refresh}: {supportedAssets: Suppo
     const handleCreateAd = async() => {
         if(!isConnected) return;
         if(!priceLimit) return;
-        console.log("It runs", selectedAsset)
         if(!account) return;
         // console.log("ethers.utils.parseUnits(priceLimit, ether).toBigInt()", ethers.utils.parseUnits(priceLimit, "ether").toBigInt());
         setLoading(true);

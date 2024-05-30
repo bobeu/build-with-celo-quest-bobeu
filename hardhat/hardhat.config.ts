@@ -53,6 +53,11 @@ const config: HardhatUserConfig = {
             default: 1,
             44787: "0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1",
             42220: ""
+        },
+        other: {
+            default: 2,
+            44787: "0x813Af3052B521fF0E96576702399a1D5b8C93fCe",
+            42220: "0x813Af3052B521fF0E96576702399a1D5b8C93fCe"
         }
       },
     

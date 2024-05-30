@@ -7,6 +7,7 @@ import { navigator } from "./Footer";
 import { Searchbar } from "./Searchbar";
 import { Dropdown } from "./Dropdown";
 import Stack from "@mui/material/Stack";
+import Box from "@mui/material/Box";
 import type { ToggleDrawer, ScrollToSection, SectionId, HeaderProps, ItemInfo, CartItem } from "./apis/readContract";
 
 export default function Header(props: { items: CartItem[], activeLink: SectionId, scrollToSection: ScrollToSection, toggleDrawer: ToggleDrawer, handleSearch: (arg: React.ChangeEvent<HTMLInputElement>) => void}) {
@@ -19,6 +20,7 @@ export default function Header(props: { items: CartItem[], activeLink: SectionId
         connect({ connector: injected({ target: "metaMask" }) });
         if (window.ethereum && window.ethereum.isMiniPay) {
             setHideConnectBtn(true);
+            connect({ connector: injected({ target: "metaMask" }) });
         }
     }, []);
     
@@ -71,12 +73,12 @@ export default function Header(props: { items: CartItem[], activeLink: SectionId
                     </div>
 
                     <Stack className="place-items-center space-y-2 text- text-white ">
-                        <h3>{"Which asset are you looking for?"}</h3>
                         <div>{isConnected && <ConnectButton />}</div>
-                        <div className="w-full flex justify-between p-2 gap-2">
+                        <h3>{"Which asset are you looking for?"}</h3>
+                        <Box className="flex justify-between items-center py-2 px-4 gap-2">
                             <Dropdown toggleDrawer={toggleDrawer} />
                             <Searchbar handleSearch={handleSearch} />
-                        </div>
+                        </Box>
                     </Stack>
                 </>
             )}

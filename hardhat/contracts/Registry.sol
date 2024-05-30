@@ -235,7 +235,7 @@ contract Registry is IRegistry, Ownable {
                 uint256 amtToPay;
                 uint fee = 1e17 wei;
                 unchecked {
-                    amtToPay = amount * offerPrice;
+                    amtToPay = (amount * offerPrice) / 1 ether;
                 }
                 storeFront[storeId].info.quantity = req.info.quantity - amount;
                 require(

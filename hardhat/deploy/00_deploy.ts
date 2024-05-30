@@ -9,7 +9,7 @@ const builder = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] as const;
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
 	const {deploy, getNetworkName} = deployments;
-	const {deployer, cUSD} = await getNamedAccounts();
+	const {deployer, cUSD, other} = await getNamedAccounts();
 
   const deployTestSupportedAssets = async() => {
     let supportedAssets : string[] = [];
@@ -26,7 +26,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       const symbol = assetCase[i].symbol;
       const deployed = await deploy("TestToken", {
         from: deployer,
-        args: [name, symbol],
+        args: [name, symbol, other],
         log: true,
       });
       supportedAssets.push(deployed.address);

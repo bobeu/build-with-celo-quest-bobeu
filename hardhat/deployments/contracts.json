@@ -116,7 +116,7 @@
       ]
     },
     "Registry": {
-      "address": "0xB12A014578794901e8efaA5664dcb721A25576e0",
+      "address": "0x02868450E55476Ae50519729f54AB5E3F6Ac785D",
       "abi": [
         {
           "inputs": [
@@ -613,7 +613,7 @@
       ]
     },
     "TestToken": {
-      "address": "0x2244825808162650442A6fBD94358eD4A9fb9D8f",
+      "address": "0xe212D8C567107843138739B1aB9cD217793f1e2B",
       "abi": [
         {
           "inputs": [
@@ -626,6 +626,11 @@
               "internalType": "string",
               "name": "tokenSymbol",
               "type": "string"
+            },
+            {
+              "internalType": "address",
+              "name": "other",
+              "type": "address"
             }
           ],
           "stateMutability": "nonpayable",

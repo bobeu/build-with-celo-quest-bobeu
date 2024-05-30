@@ -5,6 +5,7 @@ import { waitForConfirmation } from "./waitForConfirmation";
 import { Callback, CartItem, getBalance } from "./readContract";
 import sendCUSD from "./sendCUSD";
 import { bn } from "@/utilities";
+import { ethers } from "ethers";
 
 const buyItemAbi = [
   {
@@ -41,9 +42,12 @@ const buyItemAbi = [
 const scrutinizeBalance = async({config, xWallet, account, costPriceInCUSD}:{config: Config, account: OxString, xWallet: OxString, costPriceInCUSD: bigint, }) : Promise<boolean> => {
   let canExecute = false;
   const balance = await getBalance({config, account: xWallet});
+  console.log("balance", balance.toString());
   if(bn(balance).lt(bn(costPriceInCUSD))){
-    const topUp = bn(costPriceInCUSD).sub(bn(balance))
+    const topUp = bn(costPriceInCUSD).sub(bn(balance));
     const balSender = await getBalance({config, account});
+    console.log("Topup", topUp.toString());
+    console.log("balSender", balSender.toString());
     if(bn(balSender).gte(topUp)){
       await sendCUSD(xWallet, topUp.toBigInt())
         .then(() => canExecute = true );
@@ -58,12 +62,14 @@ export async function buy(args: {config: Config, storeId: bigint, offerPrice: bi
   callback?.({txStatus: "Pending"});
   const canExecute = await scrutinizeBalance({config, account, xWallet, costPriceInCUSD});
   if(canExecute) {
+    // console.log("offerPrice", offerPrice.toString())
+    // console.log("amountToBuy", amountToBuy.toString())
     const { request } = await simulateContract(config, {
       address: registry,
       account,
       abi: buyItemAbi,
       functionName: "buy",
-      args: [storeId, offerPrice, amountToBuy],
+      args: [storeId, amountToBuy, offerPrice],
     });
     callback?.({txStatus: "Confirming"});
     const hash = await writeContract(config, request ); 
@@ -93,9 +99,10 @@ export async function sendBatchTransaction(
   }
   let costPriceInCUSD: bigint = 0n;
   param.forEach((item) =>{
-    costPriceInCUSD = bn(costPriceInCUSD).add(bn(item.costPriceInCUSD)).toBigInt();
-  } );
-  console.log("costPriceInCUSD", costPriceInCUSD.toString())
+    costPriceInCUSD = bn(costPriceInCUSD).add(bn(item.costPriceInCUSD)).add(ethers.utils.parseUnits("0.1", "ether")).toBigInt();
+  });
+  console.log("costPriceInCUSD", costPriceInCUSD.toString());
   const canExecute = await scrutinizeBalance({config, account, xWallet, costPriceInCUSD});
-  return canExecute && await multicall(config, multicallParam);
+  if(!canExecute) return;
+  return await multicall(config, multicallParam);
 }

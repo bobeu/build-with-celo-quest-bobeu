@@ -1,5 +1,5 @@
 import React from "react";
-import { Anchor, CoinCategory, HomeProps, InitStorage, getData } from "./apis/readContract";
+import { Anchor, CoinCategory, HomeProps, InitStorage, MOCK_PHONENUMBERS, getData } from "./apis/readContract";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
@@ -31,8 +31,8 @@ export const Home: React.FC<HomeProps> = ({mockStorage, storage, refresh, coinCa
         const { item: { info: {storeId}}, offerPrice, amountToBuy, costPriceInCUSD } = items[0];
         let xWallet = xWallets.filter((item) => item.owner.toLowerCase() === account.toLowerCase())?.at(0)?.xWallet;
         console.log("xWallet", xWallet);
-        let canExecute = xWallet && (xWallet !== zeroAddress);
-        if(!xWallet) {
+        let canExecute = xWallet !== undefined;
+        if(!canExecute) {
             await createXWallet({config, account})
                 .then(() => {
                     canExecute = true;
@@ -43,17 +43,28 @@ export const Home: React.FC<HomeProps> = ({mockStorage, storage, refresh, coinCa
             } });
         }
         if(canExecute){
+            // console.log("Fee", ethers.utils.parseUnits("0.1", "ether"));
+            const totalCost = bn(costPriceInCUSD).add(ethers.utils.parseUnits("0.1", "ether")).toBigInt();
+            // console.log("totalCost", totalCost);
             try {
                 if(items.length === 1) {
-                    console.log("Hereeee")
-                    await buy({config, storeId, offerPrice, account, amountToBuy, xWallet: xWallet!, costPriceInCUSD })
+                    console.log("Sending unit trx");
+                    await buy({config, storeId, offerPrice, account, amountToBuy, xWallet: xWallet!, costPriceInCUSD: totalCost })
+                        .then(() => removeFromCart(items[0]));
                 } else {
+                    console.log("Sending batch trx");
                     await sendBatchTransaction(config, account, xWallet!, items)
                         .then((result) => {
                             console.log("Result", result);
+                            for(let i = 0; i < items.length; i++) {
+                                if(result?.at(i)?.status === "success") {
+                                    removeFromCart(items[i]);
+                                    // console.log("result[i]", result?.at(i).status)
+                                }
+                            }
                         })
                 }
-                items.forEach((item) => removeFromCart(item));
+                // items.forEach((item) => removeFromCart(item));
                 refresh("Your trade was completed successfully");
             } catch (error: any) {
                 console.log("Error", error?.message || error?.data.message);
@@ -127,7 +138,7 @@ export const Home: React.FC<HomeProps> = ({mockStorage, storage, refresh, coinCa
                 </div>
                 <div className="flex justify-between items-center">
                     <h3>Seller Contact</h3>
-                    <h3>{si.seller}</h3>
+                    <h3>{MOCK_PHONENUMBERS[parseInt(si?.info.assetId.toString())]}</h3>
                 </div>
             </Box>
             <Divider />
@@ -289,7 +300,7 @@ export const Home: React.FC<HomeProps> = ({mockStorage, storage, refresh, coinCa
         <Box className="max-h-[300px] w-full overflow-y-auto md:overflow-y-auto">
             <Grid container spacing={2}>
                 {
-                    stores.filter((item) => (coinCategory === "" || coinCategory === "ALL")? true : COIN_CATEGORY_STRING[item.metadata.category] === coinCategory)
+                    stores.length > 0? stores.filter((item) => (coinCategory === "" || coinCategory === "ALL")? true : COIN_CATEGORY_STRING[item.metadata.category] === coinCategory)
                         .filter((item) => (!searchResult || searchResult === "")? true : (item.metadata.name === searchResult || item.metadata.symbol === searchResult))
                         .map((item, index) => (
                         <Grid item xs={6} md={3} key={index}> 
@@ -303,17 +314,17 @@ export const Home: React.FC<HomeProps> = ({mockStorage, storage, refresh, coinCa
                                 </Box>
                             </Stack> 
                         </Grid>
-                    ))
-                }
-                <Grid item xs={4} md={3}>
-                    <Box className="flex flex-col justify-center item-center border-2 bg-gray-200 text-gray-400 rounded-sm p-2 text-xs cursor-pointer font-serif self-stretch place-items-center hover:bg-stone-300 hover:text-orange-900 active:border-2 active:border-green-400">
-                        <button className="p-3" onClick={() => scrollToSection("Sell")}>
+                    )) : <Grid item xs={12} >
+                    <Box className="flex flex-col justify-center items-center border-2 bg-gray-200 text-gray-400 rounded-sm p-2 text-xs cursor-pointer font-serif self-stretch place-items-center hover:bg-stone-300 hover:text-orange-900 active:border-2 active:border-green-400">
+                        <button className="w- p-2" onClick={() => scrollToSection("Sell")}>
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                             </svg>
                         </button>
                     </Box>
                 </Grid>
+                }
+                
             </Grid>
             
             <AllSideDrawer { ...{ activeLink, scrollToSection, drawerState, toggleDrawer } }>

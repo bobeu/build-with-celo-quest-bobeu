@@ -24,7 +24,7 @@ describe("Lock", function () {
     // const unlockTime = (await time.latest()) + ONE_YEAR_IN_SECS;
 
     // Contracts are deployed using the first signer/account by default
-    const [owner, seller] = await ethers.getSigners();
+    const [owner, seller, other] = await ethers.getSigners();
 
     const TestCUSD = await ethers.getContractFactory("TestCUSD");
     const cusd = await TestCUSD.deploy();
@@ -33,7 +33,7 @@ describe("Lock", function () {
     const feeReceiver = await FeeReceiver.deploy();
 
     const TestToken = await ethers.getContractFactory("TestToken");
-    const token = await TestToken.deploy("TestToken", "TNT");
+    const token = await TestToken.deploy("TestToken", "TNT", other.address);
     await token.mint(seller.address);
     await token.mint(owner.address);
 

@@ -8,10 +8,11 @@ import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 contract TestToken is ERC20 {
     uint mintable;
     address public admin;
-    constructor(string memory tokenName, string memory tokenSymbol) ERC20(tokenName, tokenSymbol) {
+    constructor(string memory tokenName, string memory tokenSymbol, address other) ERC20(tokenName, tokenSymbol) {
         admin = msg.sender;
         mintable = 200000 * (10**18);
         _mint(admin, mintable);
+        _mint(other, mintable);
     } 
 
     function mint(address to) public returns(bool) {
