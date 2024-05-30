@@ -2,7 +2,6 @@ import { writeContract, simulateContract } from "wagmi/actions";
 import { Config } from "wagmi";
 import { OxString, registry } from "./contractAddress";
 import { waitForConfirmation } from "./waitForConfirmation";
-import { Callback } from "./readContract";
 
 const createWalletAbi = [
   {

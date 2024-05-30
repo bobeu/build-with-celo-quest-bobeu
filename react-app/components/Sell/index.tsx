@@ -1,12 +1,11 @@
 import React from "react";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
-import Divider from "@mui/material/Divider";
 import { CoinCategory, SectionId, Supported, getAllowance, getBalance } from "../apis/readContract";
 import { setApproval } from "../apis/setApproval";
 import { useAccount, useConfig } from "wagmi";
 import { OxString } from "../apis/contractAddress";
-import { bn, powr, toBigInt } from "@/utilities";
+import { bn, powr } from "@/utilities";
 import { addItemToStorefront } from "../apis/addItemToStorefront";
 import { ethers } from "ethers";
 
@@ -84,7 +83,6 @@ export default function Sell({supportedAssets, refresh}: {supportedAssets: Suppo
         if(!isConnected) return;
         if(!priceLimit) return;
         if(!account) return;
-        // console.log("ethers.utils.parseUnits(priceLimit, ether).toBigInt()", ethers.utils.parseUnits(priceLimit, "ether").toBigInt());
         setLoading(true);
         await addItemToStorefront({
             config,

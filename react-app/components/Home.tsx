@@ -4,7 +4,6 @@ import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
 import Stack from "@mui/material/Stack";
-import Button from "@mui/material/Button";
 import AllSideDrawer from "./AllSideDrawer";
 import { bn, powr } from "@/utilities";
 import { ethers } from "ethers";
@@ -12,7 +11,6 @@ import Address from "./Address";
 import { buy, sendBatchTransaction } from "./apis/buy";
 import { useAccount, useConfig } from "wagmi";
 import { createXWallet } from "./apis/createXWallet";
-import { zeroAddress } from "viem";
 
 const COIN_CATEGORY_STRING = new InitStorage().coinCategory;
 
@@ -43,9 +41,7 @@ export const Home: React.FC<HomeProps> = ({mockStorage, storage, refresh, coinCa
             } });
         }
         if(canExecute){
-            // console.log("Fee", ethers.utils.parseUnits("0.1", "ether"));
             const totalCost = bn(costPriceInCUSD).add(ethers.utils.parseUnits("0.1", "ether")).toBigInt();
-            // console.log("totalCost", totalCost);
             try {
                 if(items.length === 1) {
                     console.log("Sending unit trx");
@@ -59,7 +55,6 @@ export const Home: React.FC<HomeProps> = ({mockStorage, storage, refresh, coinCa
                             for(let i = 0; i < items.length; i++) {
                                 if(result?.at(i)?.status === "success") {
                                     removeFromCart(items[i]);
-                                    // console.log("result[i]", result?.at(i).status)
                                 }
                             }
                         })
