@@ -1,7 +1,6 @@
 import React from "react";
 import { useAccount, useConfig } from "wagmi";
 import Container from "@mui/material/Container";
-import Box from "@mui/material/Box";
 import { Home as HomePage } from "@/components/Home";
 import { InitStorage, getData } from "@/components/apis/readContract";
 import type { Storage, StoreData, SectionId, Anchor, ItemInfo, ContentType, CoinCategory, CartItem } from "@/components/apis/readContract";
@@ -12,6 +11,7 @@ import Messages from "@/components/Messages";
 import { OxString } from "@/components/apis/contractAddress";
 import { zeroAddress } from "viem";
 
+const mock_Storage = new InitStorage();
 export default function Home() {
     const [ userAddress, setUserAddress] = React.useState<OxString>(zeroAddress);
     const [ sellerToMesage, setSeller] = React.useState<OxString | string>(zeroAddress);
@@ -24,7 +24,7 @@ export default function Home() {
     const [ searchResult, setSearchResult ] = React.useState<string>("");
     const [ coinCategory, setCoinCategory ] = React.useState<string>("");
     const [ signal, setSignal ] = React.useState<number>(0);
-    const [ storage, setStorage ] = React.useState<Storage>(new InitStorage().mockStorage);
+    const [ storage, setStorage ] = React.useState<Storage>();
     
     const { address, isConnected } = useAccount();
     const config = useConfig();
@@ -37,19 +37,13 @@ export default function Home() {
                 setSeller(seller);
             }
         }
-        // const sectionElement = document.getElementById(sectionId);
-        // const offset = 128;
-        // if (sectionElement) {
-        //     const targetScroll = sectionElement.offsetTop - offset;
-        //     sectionElement.scrollIntoView({ behavior: 'smooth' });
-        //     window.scrollTo({
-        //         top: targetScroll,
-        //         behavior: 'smooth',
-        //     });
-        // }
     };
 
-    const refresh = () => setSignal((p) => p + 1);
+    const refresh = (message?: string, sectionId?: SectionId) => {
+        message && setMessage(message);
+        sectionId && scrollToSection(sectionId)
+        setSignal((p) => p + 1);
+    };
 
     const addToCart = (item: CartItem) => {
         if(!items.includes(item)) {
@@ -121,11 +115,11 @@ export default function Home() {
     const sections : {id: SectionId, element: JSX.Element}[] = [
         {
             id: "Home",
-            element: <HomePage { ...{activeLink, refresh, addToCart, drawerState, contentType, items, mockStorage: storage, scrollToSection, selectedItem, toggleDrawer, searchResult, removeFromCart, handleButtonClick}} coinCategory={coinCategory} />
+            element: <HomePage { ...{activeLink, refresh, addToCart, drawerState, contentType, items, mockStorage: mock_Storage.mockStorage, storage, scrollToSection, selectedItem, toggleDrawer, searchResult, removeFromCart, handleButtonClick}} coinCategory={coinCategory} />
         },
         {
             id: "Sell",
-            element: <Sell { ...{supportedAssets: storage.supportedAssets, } } />
+            element: <Sell { ...{supportedAssets: storage? storage.supportedAssets : mock_Storage.mockStorage.supportedAssets, refresh } } />
         },
         {
             id: "Messages",

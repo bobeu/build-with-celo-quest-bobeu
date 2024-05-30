@@ -16,11 +16,12 @@ export default function Header(props: { items: CartItem[], activeLink: SectionId
     const { scrollToSection, activeLink, toggleDrawer, items, handleSearch } = props;
 
     useEffect(() => {
+        connect({ connector: injected({ target: "metaMask" }) });
         if (window.ethereum && window.ethereum.isMiniPay) {
             setHideConnectBtn(true);
-            connect({ connector: injected({ target: "metaMask" }) });
         }
     }, []);
+    
 
     return (
         <Disclosure as="nav" className="bg-orange-400 border-b border-black h-[fit-content] md:h-full">
@@ -70,12 +71,8 @@ export default function Header(props: { items: CartItem[], activeLink: SectionId
                     </div>
 
                     <Stack className="place-items-center space-y-2 text- text-white ">
-                        <div className={`${isConnected && "w-full flex justify-between items-center px-2"}`} >
-                            <h3>{"Which asset are you looking for?"}</h3>
-                            {
-                                isConnected && <ConnectButton />
-                            }
-                        </div>
+                        <h3>{"Which asset are you looking for?"}</h3>
+                        <div>{isConnected && <ConnectButton />}</div>
                         <div className="w-full flex justify-between p-2 gap-2">
                             <Dropdown toggleDrawer={toggleDrawer} />
                             <Searchbar handleSearch={handleSearch} />

@@ -1,12 +1,11 @@
 import { writeContract, simulateContract, multicall, MulticallParameters } from "wagmi/actions";
 import { Config } from "wagmi";
-import { OxString, contractAddress } from "./contractAddress";
+import { OxString, registry } from "./contractAddress";
 import { waitForConfirmation } from "./waitForConfirmation";
 import { Callback, CartItem, getBalance } from "./readContract";
 import sendCUSD from "./sendCUSD";
 import { bn } from "@/utilities";
 
-const address = contractAddress();
 const buyItemAbi = [
   {
     "inputs": [
@@ -16,9 +15,9 @@ const buyItemAbi = [
         "type": "uint256"
       },
       {
-        "internalType": "uint224",
+        "internalType": "uint256",
         "name": "amount",
-        "type": "uint224"
+        "type": "uint256"
       },
       {
         "internalType": "uint256",
@@ -43,7 +42,7 @@ const scrutinizeBalance = async({config, xWallet, account, costPriceInCUSD}:{con
   let canExecute = false;
   const balance = await getBalance({config, account: xWallet});
   if(bn(balance).lt(bn(costPriceInCUSD))){
-    const topUp = bn(balance).sub(bn(costPriceInCUSD))
+    const topUp = bn(costPriceInCUSD).sub(bn(balance))
     const balSender = await getBalance({config, account});
     if(bn(balSender).gte(topUp)){
       await sendCUSD(xWallet, topUp.toBigInt())
@@ -60,7 +59,7 @@ export async function buy(args: {config: Config, storeId: bigint, offerPrice: bi
   const canExecute = await scrutinizeBalance({config, account, xWallet, costPriceInCUSD});
   if(canExecute) {
     const { request } = await simulateContract(config, {
-      address,
+      address: registry,
       account,
       abi: buyItemAbi,
       functionName: "buy",
@@ -84,7 +83,7 @@ export async function sendBatchTransaction(
       (item) => {
         return {
           abi: buyItemAbi,
-          address,
+          address: registry,
           account,
           functionName: "buy",
           args: [item.storeId, item.offerPrice, item.amountToBuy]

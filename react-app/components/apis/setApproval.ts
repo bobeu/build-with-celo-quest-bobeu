@@ -1,6 +1,6 @@
 import { writeContract, simulateContract } from "wagmi/actions";
 import { Config } from "wagmi";
-import { OxString, contractAddress } from "./contractAddress";
+import { OxString, registry } from "./contractAddress";
 import { waitForConfirmation } from "./waitForConfirmation";
 import { Callback } from "./readContract";
 
@@ -39,7 +39,7 @@ export async function setApproval(args: {config: Config, amount: bigint, contrac
       account,
       abi: approvalAbi,
       functionName: "approve",
-      args: [contractAddress, amount],
+      args: [registry, amount],
     });
     callback?.({txStatus: "Confirming"});
     const hash = await writeContract(config, request ); 

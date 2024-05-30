@@ -1,5 +1,5 @@
 import React from "react";
-import { Anchor, CoinCategory, HomeProps, InitStorage } from "./apis/readContract";
+import { Anchor, CoinCategory, HomeProps, InitStorage, getData } from "./apis/readContract";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
@@ -11,15 +11,17 @@ import { ethers } from "ethers";
 import Address from "./Address";
 import { buy, sendBatchTransaction } from "./apis/buy";
 import { useAccount, useConfig } from "wagmi";
+import { createXWallet } from "./apis/createXWallet";
 import { zeroAddress } from "viem";
 
 const COIN_CATEGORY_STRING = new InitStorage().coinCategory;
 
-export const Home: React.FC<HomeProps> = ({mockStorage, refresh, coinCategory, searchResult, toggleDrawer, removeFromCart, drawerState, contentType, activeLink, scrollToSection, items, selectedItem: si, addToCart, handleButtonClick}) => {
+export const Home: React.FC<HomeProps> = ({mockStorage, storage, refresh, coinCategory, searchResult, toggleDrawer, removeFromCart, drawerState, contentType, activeLink, scrollToSection, items, selectedItem: si, addToCart, handleButtonClick}) => {
     const [ drawerContent, setDrawerContent ] = React.useState<React.ReactNode>();
     const [ amountToBuy, setAmountToBuy ] = React.useState<string>();
     const [ offerPrice, setOfferPrice ] = React.useState<string>();
-    const { stores, supportedAssets, xWallets } = mockStorage;
+    const storageInUse = storage? storage : mockStorage;
+    const { stores, xWallets } = storageInUse;
 
     const { address : account, } = useAccount();
     const config = useConfig();
@@ -27,19 +29,36 @@ export const Home: React.FC<HomeProps> = ({mockStorage, refresh, coinCategory, s
     const handleCheckout = async() => {
         if(!account) return alert("Not Inside Minipay Wallet");
         const { item: { info: {storeId}}, offerPrice, amountToBuy, costPriceInCUSD } = items[0];
-        const xWallet = xWallets.filter((item) => item.owner === account)?.at(0)?.xWallet;
-        if(!xWallet) return;
-        try {
-            if(items.length === 1) {
-                await buy({config, storeId, offerPrice, account, amountToBuy, xWallet, costPriceInCUSD })
-            } else {
-                await sendBatchTransaction(config, account, xWallet, items);
-            }
-            
-        } catch (error: any) {
-            console.log("Error", error?.message || error?.data.message);
+        let xWallet = xWallets.filter((item) => item.owner.toLowerCase() === account.toLowerCase())?.at(0)?.xWallet;
+        console.log("xWallet", xWallet);
+        let canExecute = xWallet && (xWallet !== zeroAddress);
+        if(!xWallet) {
+            await createXWallet({config, account})
+                .then(() => {
+                    canExecute = true;
+                    refresh("You successfully created an 'X' wallet");
+                });
+            await getData({config, account, callback: (result) => {
+                xWallet = result.result?.xWallets.filter((item) => item.owner.toLowerCase() === account.toLowerCase())?.at(0)?.xWallet;
+            } });
         }
-        refresh();
+        if(canExecute){
+            try {
+                if(items.length === 1) {
+                    console.log("Hereeee")
+                    await buy({config, storeId, offerPrice, account, amountToBuy, xWallet: xWallet!, costPriceInCUSD })
+                } else {
+                    await sendBatchTransaction(config, account, xWallet!, items)
+                        .then((result) => {
+                            console.log("Result", result);
+                        })
+                }
+                items.forEach((item) => removeFromCart(item));
+                refresh("Your trade was completed successfully");
+            } catch (error: any) {
+                console.log("Error", error?.message || error?.data.message);
+            }
+        }
     }
     
     const boxWrapper = (anchor: Anchor, children: React.ReactNode) => (
@@ -76,7 +95,7 @@ export const Home: React.FC<HomeProps> = ({mockStorage, refresh, coinCategory, s
     const selectedAsset = () => boxWrapper(
         "bottom",
         <React.Fragment>
-            <Box className="text-sm">
+            <Box className="text-sm font-serif space-y-1">
                 <h2 className="font-serif underline font-semibold text-md">Asset Information</h2>
                 <div className="flex justify-between items-center">
                     <h3>Contract address</h3>
@@ -99,11 +118,15 @@ export const Home: React.FC<HomeProps> = ({mockStorage, refresh, coinCategory, s
                     <h3>{ethers.utils.formatUnits(si?.info.quantity.toString(), "ether")}</h3>
                 </div>
                 <div className="flex justify-between items-center">
+                    <h3>{`Min price per unit of ${si?.metadata.symbol}`}</h3>
+                    <h3>{ethers.utils.formatEther(si?.priceLimit.toString())}</h3>
+                </div>
+                <div className="flex justify-between items-center">
                     <h3>Store ID</h3>
                     <h3>{si?.info.storeId.toString()}</h3>
                 </div>
                 <div className="flex justify-between items-center">
-                    <h3>Phone</h3>
+                    <h3>Seller Contact</h3>
                     <h3>{si.seller}</h3>
                 </div>
             </Box>
@@ -263,25 +286,34 @@ export const Home: React.FC<HomeProps> = ({mockStorage, refresh, coinCategory, s
     }, [contentType, coinCategory, items, si, amountToBuy, offerPrice]);
 
     return (
-        <Box className="w-full ">
+        <Box className="max-h-[300px] w-full overflow-y-auto md:overflow-y-auto">
             <Grid container spacing={2}>
                 {
                     stores.filter((item) => (coinCategory === "" || coinCategory === "ALL")? true : COIN_CATEGORY_STRING[item.metadata.category] === coinCategory)
                         .filter((item) => (!searchResult || searchResult === "")? true : (item.metadata.name === searchResult || item.metadata.symbol === searchResult))
                         .map((item, index) => (
-                        <Grid item xs={4} md={3} key={index}> 
-                            <Stack onClick={toggleDrawer("bottom", true, "selectedAsset", item)} className="border-2 bg-stone-900 rounded-sm p-2 text-xs cursor-pointer text-green-100 font-serif self-stretch place-items-center hover:bg-stone-300 hover:text-orange-900 active:border-2 active:border-green-400">
-                                <Box className="w-full float-right font-mono px-2 text-center text-orange-200">
-                                    <p style={{fontSize: "0.5rem"}}>{CoinCategory[item.metadata.category]}</p>
-                                </Box>
+                        <Grid item xs={6} md={3} key={index}> 
+                            <Stack onClick={toggleDrawer("bottom", true, "selectedAsset", item)} className="text-center border-2 bg-stone-900 rounded-sm p-2 text-xs cursor-pointer text-green-100 font-serif self-stretch place-items-center hover:bg-stone-300 hover:text-orange-900 active:border-2 active:border-green-400">
+                                <p style={{fontSize: "0.5rem"}} className="font-mono text-orange-200">{CoinCategory[item.metadata.category]}</p>
+                                {/* <Box className="w-full float-right font-mono px-2 text-center text-orange-200">
+                                </Box> */}
                                 <Box>
-                                    <h3>{item.metadata.name}</h3>
                                     <h3>{item.metadata.symbol}</h3>
+                                    <h3>{`min/${ethers.utils.formatEther(item.priceLimit.toString())}`}</h3>
                                 </Box>
                             </Stack> 
                         </Grid>
                     ))
                 }
+                <Grid item xs={4} md={3}>
+                    <Box className="flex flex-col justify-center item-center border-2 bg-gray-200 text-gray-400 rounded-sm p-2 text-xs cursor-pointer font-serif self-stretch place-items-center hover:bg-stone-300 hover:text-orange-900 active:border-2 active:border-green-400">
+                        <button className="p-3" onClick={() => scrollToSection("Sell")}>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                            </svg>
+                        </button>
+                    </Box>
+                </Grid>
             </Grid>
             
             <AllSideDrawer { ...{ activeLink, scrollToSection, drawerState, toggleDrawer } }>

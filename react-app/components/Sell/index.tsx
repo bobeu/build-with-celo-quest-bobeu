@@ -2,7 +2,7 @@ import React from "react";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Divider from "@mui/material/Divider";
-import { CoinCategory, Supported, getBalance } from "../apis/readContract";
+import { CoinCategory, SectionId, Supported, getAllowance, getBalance } from "../apis/readContract";
 import { setApproval } from "../apis/setApproval";
 import { useAccount, useConfig } from "wagmi";
 import { OxString } from "../apis/contractAddress";
@@ -10,7 +10,7 @@ import { bn, powr, toBigInt } from "@/utilities";
 import { addItemToStorefront } from "../apis/addItemToStorefront";
 import { ethers } from "ethers";
 
-export default function Sell({supportedAssets}: {supportedAssets: Supported}) {
+export default function Sell({supportedAssets, refresh}: {supportedAssets: Supported, refresh: (message?: string, sectionId?: SectionId) => void}) {
     const [ selectedAsset, setSelected ] = React.useState<{name: string, assetContract: OxString, assetId: bigint}>();
     const [ displayAsset, setDisplay ] = React.useState<boolean>(false);
     const [ quantity, setQuantity ] = React.useState<string>();
@@ -19,7 +19,7 @@ export default function Sell({supportedAssets}: {supportedAssets: Supported}) {
     const [ loading, setLoading ] = React.useState<boolean>(false);
     const [ balance, setBalance ] = React.useState<ethers.BigNumber>(ethers.BigNumber.from(0));
 
-    const { address : account} = useAccount();
+    const { address : account, isConnected } = useAccount();
     const config = useConfig();
 
     const handleSelectedAssetClick = async(option: {name: string, assetContract: OxString, assetId: bigint}) => {
@@ -51,45 +51,62 @@ export default function Sell({supportedAssets}: {supportedAssets: Supported}) {
         if(!selectedAsset?.assetContract) return;
         if(!quantity) return;
         if(!account) return;
+        let diff : ethers.BigNumber = ethers.BigNumber.from(0);
         const amtToSell = powr(quantity, 1, 18);
-        if(balance.lt(amtToSell)) return;
-        setLoading(true);
-        await setApproval({
-            config,
-            account,
-            amount: amtToSell.toBigInt(),
-            contractAddress: selectedAsset?.assetContract
+        const allowance = await getAllowance({config, account, contractAddr: selectedAsset?.assetContract})
+        console.log("amountToSell", amtToSell.toString());
+        if(allowance.lt(amtToSell)) {
+            diff = amtToSell.sub(allowance);
+            if(balance.gte(diff)) {
+                setLoading(true);
+                await setApproval({
+                    config,
+                    account,
+                    amount: diff.toBigInt(),
+                    contractAddress: selectedAsset?.assetContract
+        
+                }).then(() => {
+                    setApprovalDone(true);
+                    setLoading(false);
+                    refresh(`Sell request of ${ethers.utils.formatEther(diff.toString())}  ${selectedAsset?.name} was approved`);
+                });
+            } else {
+                return refresh(`You do not have enough ${selectedAsset.name} to sell`);
+            }
 
-        }).then(() => {
-            setApprovalDone(true);
-            setLoading(false);
-        });
+        } else {
+            !approvalDone && setApprovalDone(true);
+            return refresh(`Previous approval detected. Go ahead and create ad worth of ${ethers.utils.formatEther(allowance.toString())} ${selectedAsset?.name}`)
+        }
     }
 
     const handleCreateAd = async() => {
+        if(!isConnected) return;
         if(!priceLimit) return;
-        if(!selectedAsset?.assetId) return;
+        console.log("It runs", selectedAsset)
         if(!account) return;
+        // console.log("ethers.utils.parseUnits(priceLimit, ether).toBigInt()", ethers.utils.parseUnits(priceLimit, "ether").toBigInt());
         setLoading(true);
         await addItemToStorefront({
             config,
             account,
-            priceLimit: toBigInt(priceLimit),
-            assetId: selectedAsset?.assetId,
+            priceLimit: ethers.utils.parseUnits(priceLimit, "ether").toBigInt(),
+            assetId: selectedAsset?.assetId!,
 
         }).then(() => {
             setApprovalDone(false);
             setLoading(false);
+            refresh(`Sell request was successfully added to store`, "Home");
         });
     }
 
     return(
         <Box className="space-y-4">
-            <Box className="flex justify-between items-center">
-                <h3>Create your Ad</h3>
-                <h3>{`Bal: ${ethers.utils.parseUnits(balance.toString(), "ether").toString()} `}</h3>
+            <Box className="flex justify-between items-center text-md">
+                <h3 className="font-black text-orange-900">Create your Ad</h3>
+                <h3 className="text-xs font-medium">{`Bal: ${ethers.utils.formatEther(balance.toString()).toString()} `}</h3>
             </Box>
-            <Divider />
+            {/* <Divider /> */}
             <Box className="max-h-[200px] overflow-auto ">
                 <button onClick={() => setDisplay(!displayAsset)} className="w-full bg-gray-100 p-2 flex justify-between items-center text-stone-800 rounded-sm border-2 border-gray-200 text-sm md:text-lg">
                     <h3>{selectedAsset?.name || "Pick Your Assets"}</h3>
@@ -102,8 +119,7 @@ export default function Sell({supportedAssets}: {supportedAssets: Supported}) {
                 <div className="w-full" hidden={!displayAsset} >
                     {
                         supportedAssets?.map(({name, category, asset, assetId}, i) => (
-                            <button key={i} onClick={async() => await handleSelectedAssetClick({name, assetContract: asset, assetId})} className="w-full flex justify-between items-center bg-white hover:bg-stone-300 text-xs p-4 border-2 border-stone-200 font-serif"
-                            >
+                            <button key={i} onClick={async() => await handleSelectedAssetClick({name, assetContract: asset, assetId})} className="w-full flex justify-between items-center bg-white hover:bg-stone-300 text-xs p-4 border-2 border-stone-200 font-serif">
                                 <h3>{ name }</h3>
                                 <h3>{ CoinCategory[category] }</h3>
                             </button>

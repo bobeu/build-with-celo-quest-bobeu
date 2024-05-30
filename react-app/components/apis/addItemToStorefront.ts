@@ -1,10 +1,9 @@
 import { writeContract, simulateContract } from "wagmi/actions";
 import { Config } from "wagmi";
-import { OxString, contractAddress } from "./contractAddress";
+import { OxString, registry } from "./contractAddress";
 import { waitForConfirmation } from "./waitForConfirmation";
 import { Callback } from "./readContract";
 
-const address = contractAddress();
 const addItemAbi = [
   {
     "inputs": [
@@ -14,9 +13,9 @@ const addItemAbi = [
         "type": "uint256"
       },
       {
-        "internalType": "uint224",
+        "internalType": "uint256",
         "name": "priceLimit",
-        "type": "uint224"
+        "type": "uint256"
       }
     ],
     "name": "addItemToStoreFront",
@@ -36,7 +35,7 @@ export async function addItemToStorefront(args: {config: Config, priceLimit: big
   const { config, callback, assetId, priceLimit, account } = args;
   callback?.({txStatus: "Pending"});
   const { request } = await simulateContract(config, {
-    address,
+    address: registry,
     account,
     abi: addItemAbi,
     functionName: "addItemToStoreFront",

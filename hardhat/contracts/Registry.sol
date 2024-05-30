@@ -115,7 +115,8 @@ contract Registry is IRegistry, Ownable {
                 asset: _supportedAssets,
                 isVerified: true,
                 category: Category(categoryId),
-                name: IERC20Metadata(address(_supportedAssets)).symbol()
+                name: IERC20Metadata(address(_supportedAssets)).name(),
+                symbol: IERC20Metadata(address(_supportedAssets)).symbol()
             })
         );
     }
@@ -148,12 +149,12 @@ contract Registry is IRegistry, Ownable {
      */
     function addItemToStoreFront(
         uint assetId,
-        uint224 priceLimit
+        uint priceLimit 
     ) external validateAssetId(assetId) returns(bool) {
         (IERC20 assetContract, Category category) = _getAssetContract(assetId);
         address seller = _msgSender();
-        address storeAddr = address(this);
-        uint quantity = IERC20(assetContract).allowance(seller, storeAddr);
+        address registry = address(this);
+        uint quantity = IERC20(assetContract).allowance(seller, registry);
         uint storeId = storeFront.length;
         require(quantity > 0, "StoreFront: Quantity too low");
         storeFront.push(
@@ -174,7 +175,7 @@ contract Registry is IRegistry, Ownable {
 
         emit ItemAdded(assetId, assetContract);
         require(
-            IERC20(assetContract).transferFrom(seller, storeAddr, quantity),
+            IERC20(assetContract).transferFrom(seller, registry, quantity),
             "TransferFrom failed"
         );
         return true;
@@ -221,7 +222,7 @@ contract Registry is IRegistry, Ownable {
      */
     function _makePurchase(
         uint storeId,
-        uint224 amount,
+        uint amount,
         address buyer,
         uint offerPrice
     ) private {
@@ -264,7 +265,7 @@ contract Registry is IRegistry, Ownable {
      */
     function buy(
         uint storeId,
-        uint224 amount,
+        uint amount,
         uint offerPrice
     ) external validateStoreId(storeId) returns (bool) {
         _makePurchase(storeId, amount, _msgSender(), offerPrice);

@@ -3,14 +3,13 @@ import {DeployFunction} from 'hardhat-deploy/types';
 import { config } from "dotenv";
 
 config()
-export const isTestnet = process.env.CONTEXT === "TESTNET";
-console.log("isTEstnet: ", isTestnet);
+const builder = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] as const;
+// export const isTestnet = process.env.CONTEXT === "TESTNET";
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
 	const {deploy, getNetworkName} = deployments;
 	const {deployer, cUSD} = await getNamedAccounts();
-  const builder = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] as const;
 
   const deployTestSupportedAssets = async() => {
     let supportedAssets : string[] = [];

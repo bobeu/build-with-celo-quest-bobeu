@@ -1,10 +1,9 @@
 import { zeroAddress } from "viem";
-import { OxString, WagmiConfig, contractAddress } from "./contractAddress";
+import { OxString, WagmiConfig, registry } from "./contractAddress";
 import { readContract } from "wagmi/actions";
-import { toBigInt } from "@/utilities";
+import { bn, toBigInt } from "@/utilities";
 import { getCUSD } from "./sendCUSD";
 
-const address = contractAddress();
 export const readDataAbi = [
   {
     "inputs": [],
@@ -25,9 +24,9 @@ export const readDataAbi = [
                 "type": "address"
               },
               {
-                "internalType": "uint224",
+                "internalType": "uint256",
                 "name": "priceLimit",
-                "type": "uint224"
+                "type": "uint256"
               },
               {
                 "components": [
@@ -109,6 +108,11 @@ export const readDataAbi = [
                 "internalType": "string",
                 "name": "name",
                 "type": "string"
+              },
+              {
+                "internalType": "string",
+                "name": "symbol",
+                "type": "string"
               }
             ],
             "internalType": "struct IRegistry.SupportedAsset[]",
@@ -165,13 +169,40 @@ const getBalanceAbi = [
   },
 ] as const;
 
+const getAllowanceAbi = [
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "spender",
+        "type": "address"
+      }
+    ],
+    "name": "allowance",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+] as const;
+
 export const getData = async(args: {config: WagmiConfig, account: OxString, callback?: Callback}) => {
     const { config, account, callback } = args;
     const result : Storage = await readContract(config, {
         abi: readDataAbi,
         functionName: "getData",
         account,
-        address
+        address: registry
     });
     // return result;
     callback?.({result});
@@ -187,11 +218,24 @@ export const getBalance = async(args: {config: WagmiConfig, account: OxString, c
     });
 }
 
+export const getAllowance = async(args: {config: WagmiConfig, account: OxString, contractAddr?: OxString }) => {
+  const { config, account, contractAddr } = args;
+    return bn(
+      await readContract(config, {
+        abi: getAllowanceAbi,
+        functionName: "allowance",
+        address: contractAddr? contractAddr : getCUSD(),
+        args: [account, registry]
+      })
+    )
+}
+
 
 //////////////////// INTERFACES //////////////////////////
 
 export type Status = "Pending" | "Confirming" | "Confirmed";
 export type Callback = (args: {txStatus?: Status, result?: Storage}) => void;
+
 export interface StoreInfo {
   quantity: bigint;
   assetId: bigint;
@@ -201,7 +245,7 @@ export interface StoreInfo {
 export interface AssetMetadata {
   name: string;
   symbol: string;
-  decimals: number;
+  decimals: number; 
   category: number;
 }
 
@@ -219,6 +263,7 @@ export interface SupportedAsset {
   isVerified: boolean;
   category: number;
   name: string;
+  symbol: string;
 }
 
 export interface Wallet {
@@ -240,9 +285,10 @@ export interface CartItem {
 }
 
 export interface HomeProps {
-  mockStorage: Storage; 
+  mockStorage: Storage;
+  storage: Storage | undefined;
   searchResult: string; 
-  refresh: () => void;
+  refresh: (message?: string, sectionId?: SectionId) => void;
   toggleDrawer: ToggleDrawer; 
   drawerState: DrawerState;
   coinCategory: string;
@@ -290,19 +336,29 @@ export interface DrawerState {
 const MOCK_QUANTITY = [5000000000000000000000n, 7000000000000000000000n, 900000000000000000000n, 5590000000000000000000n, 56000000000000000000000n, 2240000000000000000000n, 1120000000000000000000n, 50000000000000000000n, 9910000000000000000000n, 230500000000000000000n] as const;
 const MOCK_PRICELIMIT = [1000000000000000000n, 220000000000000000n, 10000000000000000000n, 900000000000000000n, 93000000000000000n, 50000000000000000000n, 1120000000000000000000n, 3000000000000000000n, 2055000000000000000n, 1200000000000000n] as const;
 const MOCK_PHONENUMBERS = ["+2349026584667", "+3349026584667", "+9919026584667", "+8399026584667", "+1249026584667", "+2229026584667","+2349026584667", "+2349026584667", "+2349026584667", "+2349026584667"];
+const MOCK_ASSET_ADDR : OxString[] = [
+  '0x549e0da24fa18e3C166948D78Ba8f8036fb8c95f',
+  '0x0d58Ff11E9152b4BA06CC56A91D25B69Bc406Ee4',
+  '0x88fA29A38C055f1Fd9003195BD303E95851f5506',
+  '0xf60cb742dd7449dA59F1B05569E5798286e3C4C3',
+  '0x845E8E0f40F3FC05d42f5444679DE5fb79003fe9',
+  '0x57F5340e63bE0dfF77aD7D95De33090D4005C789',
+  '0x9370aC8505B3bcCDF41254a3329F3B19A6d7c81e',
+  '0x52742e391310a90dA6dcc2E4aCdC7ffd7CF8D87A',
+  '0x7D3479332C311Cdddd479080E20116eb12918bd6',
+  '0x2244825808162650442A6fBD94358eD4A9fb9D8f'
+];
+const BUILDER = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ] as const;
 
 export class InitStorage {
   mockStorage: Storage;
   coinCategory: string[];
-  mockSupportedAsset: {name: string, symbol: string}[];
-
+  // mockSupportedAsset: SupportedAsset[];
+  // [{asset: zeroAddress, assetId: 0n, isVerified: false, category: CoinCategory.GAMING, name: "TNT1"}]
   constructor() {
-    this.mockSupportedAsset = ([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] as const).map((i) => {
-      return {name: `Token${i}`, symbol: `TNT${i}`}
-    })
     this.coinCategory = ["MEME", "NFT", "DEFI", "GOVERNANCE", "RWA", "GAMING", "YIELD", "SPORT", "PRIVACY", "METAVERSE", "ALL"];
     this.mockStorage = {
-      stores: ([0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ] as const).map((i) => {
+      stores: BUILDER.map((i) => {
         return {
           asset: zeroAddress,
           info: {assetId: toBigInt(i), quantity: MOCK_QUANTITY[i], storeId: toBigInt(i)},
@@ -311,7 +367,16 @@ export class InitStorage {
           seller: MOCK_PHONENUMBERS[i]
         }
       }),
-      supportedAssets: [{asset: zeroAddress, assetId: 0n, isVerified: false, category: CoinCategory.GAMING, name: "TNT1"}],
+      supportedAssets: BUILDER.map((i) => {
+        return {
+          name: `Token${i}`, 
+          symbol: `TNT${i}`,
+          asset: MOCK_ASSET_ADDR[i],
+          assetId: toBigInt(i),
+          category: i,
+          isVerified: true
+        }
+      }),
       xWallets: [{owner: zeroAddress, xWallet: zeroAddress}]
     }
   }

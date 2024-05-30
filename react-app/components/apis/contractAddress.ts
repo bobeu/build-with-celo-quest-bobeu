@@ -7,4 +7,4 @@ export const formatAddr = (x: string | (OxString | undefined)) : OxString => {
     return `0x${x.substring(2, 42)}`;
 };
 
-export const contractAddress = () => formatAddr(artifacts.address);
+export const registry = formatAddr(artifacts.address);

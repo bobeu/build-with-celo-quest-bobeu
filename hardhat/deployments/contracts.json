@@ -116,7 +116,7 @@
       ]
     },
     "Registry": {
-      "address": "0xEc48D7Fca0eAdC791f325B7FB48BD9298636d57A",
+      "address": "0xB12A014578794901e8efaA5664dcb721A25576e0",
       "abi": [
         {
           "inputs": [
@@ -262,9 +262,9 @@
               "type": "uint256"
             },
             {
-              "internalType": "uint224",
+              "internalType": "uint256",
               "name": "priceLimit",
-              "type": "uint224"
+              "type": "uint256"
             }
           ],
           "name": "addItemToStoreFront",
@@ -286,9 +286,9 @@
               "type": "uint256"
             },
             {
-              "internalType": "uint224",
+              "internalType": "uint256",
               "name": "amount",
-              "type": "uint224"
+              "type": "uint256"
             },
             {
               "internalType": "uint256",
@@ -413,9 +413,9 @@
                       "type": "address"
                     },
                     {
-                      "internalType": "uint224",
+                      "internalType": "uint256",
                       "name": "priceLimit",
-                      "type": "uint224"
+                      "type": "uint256"
                     },
                     {
                       "components": [
@@ -496,6 +496,11 @@
                     {
                       "internalType": "string",
                       "name": "name",
+                      "type": "string"
+                    },
+                    {
+                      "internalType": "string",
+                      "name": "symbol",
                       "type": "string"
                     }
                   ],
@@ -608,7 +613,7 @@
       ]
     },
     "TestToken": {
-      "address": "0x9F37299Ee967B0bC9BCAA803E7FC23f71Faad029",
+      "address": "0x2244825808162650442A6fBD94358eD4A9fb9D8f",
       "abi": [
         {
           "inputs": [

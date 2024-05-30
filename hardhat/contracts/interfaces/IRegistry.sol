@@ -14,7 +14,7 @@ interface IRegistry {
     struct StoreData {
         address asset;
         address seller;
-        uint224 priceLimit;
+        uint priceLimit;
         AssetMetadata metadata;
         StoreInfo info;
     }
@@ -39,6 +39,7 @@ interface IRegistry {
         bool isVerified;
         Category category;
         string name;
+        string symbol;
     }
 
     struct Wallet {
@@ -57,9 +58,9 @@ interface IRegistry {
         Wallet[] xWallets;
     }
 
-    function addItemToStoreFront(uint assetId, uint224 priceLimit) external returns(bool);
+    function addItemToStoreFront(uint assetId, uint priceLimit) external returns(bool);
     function createXWallet() external returns(bool);
-    function buy(uint storeId, uint224 amount, uint offerPrice) external returns(bool);
+    function buy(uint storeId, uint amount, uint offerPrice) external returns(bool);
   
     event ItemAdded(uint itemId, IERC20 asset);
     event ItemRemoved(uint itemId, IERC20 asset);

@@ -33,12 +33,12 @@ describe("Lock", function () {
     const feeReceiver = await FeeReceiver.deploy();
 
     const TestToken = await ethers.getContractFactory("TestToken");
-    const token = await TestToken.deploy();
+    const token = await TestToken.deploy("TestToken", "TNT");
     await token.mint(seller.address);
     await token.mint(owner.address);
 
     const Registry = await ethers.getContractFactory("Registry");
-    const registry = await Registry.deploy([token.address], cusd.address, feeReceiver.address);
+    const registry = await Registry.deploy([token.address], [0], cusd.address, feeReceiver.address);
 
     return { registry, token, owner, seller, feeReceiver, cusd, QUANTITY, ONE_GWEI };
   }

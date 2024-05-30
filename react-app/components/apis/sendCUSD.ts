@@ -3,7 +3,8 @@ import StableTokenABI from "./cUSD.json";
 import { celoAlfajores, celo } from "viem/chains";
 import { OxString } from "./contractAddress";
 
-const isTestnet = process.env.CONTEXT === "TESTNET"; 
+// const isTestnet = process.env.CONTEXT === "TESTNET"; 
+const isTestnet = true; 
 const publicClient = createPublicClient({
   chain: isTestnet? celoAlfajores : celo,
   transport: http(),
