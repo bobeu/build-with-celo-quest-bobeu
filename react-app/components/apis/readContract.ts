@@ -381,3 +381,46 @@ export class InitStorage {
     }
   }
 }
+
+export const COIN_CATEGORY = [
+  {
+      id: "meme",
+      imageUrl: "/meme.jpg",
+  },
+  {
+      id: "nft",
+      imageUrl: "/nft.jpg",
+  },
+  {
+      id: "defi",
+      imageUrl: "/defi.png",
+  },
+  {
+      id: "governance",
+      imageUrl: "/governance1.png",
+  },
+  {
+      id: "rwa",
+      imageUrl: "/rwa.jpg",
+  },
+  {
+      id: "gaming",
+      imageUrl: "/gaming.png",
+  },
+  {
+      id: "yield",
+      imageUrl: "/yield.jpg",
+  },
+  {
+      id: "sport",
+      imageUrl: "/sport.jpg",
+  },
+  {
+      id: "privacy",
+      imageUrl: "/privacy.jpg",
+  },
+  {
+      id: "metaverse",
+      imageUrl: "/metaverse.jpg",
+  }
+]

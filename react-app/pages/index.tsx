@@ -110,7 +110,7 @@ export default function Home() {
             read();
         }
         return() => { ab.abort(); }
-    }, [address, isConnected, signal]);
+    }, [address, isConnected, signal, config]);
 
     const sections : {id: SectionId, element: JSX.Element}[] = [
         {
@@ -132,16 +132,16 @@ export default function Home() {
             footerProps={{activeLink, scrollToSection}}
             headerProps={{activeLink, items, scrollToSection, toggleDrawer, handleSearch }}
         >
-            <Container >
+            <React.Fragment>
                 {
                     sections.map(({ id, element }) => (
-                        <section key={id} id={id} hidden={activeLink !== id}>
+                        <section key={id} id={id} hidden={activeLink !== id} className="">
                             { element }
                         </section>
                     ))
                 }
                 <Notification message={message} />
-            </Container>
+            </React.Fragment>
         </Layout>
     );
 }

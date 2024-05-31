@@ -10,7 +10,7 @@ export const Navigator: React.FC<{scrollToSection: (arg: SectionId) => void, act
     <div className="w-full bg-orange-400 text-white flex mx-auto p-4 md:hidden items-center justify-between lg:px-8">
       {
         navigator.map(({text, icon}) => (
-          <Stack key={text} className={`place-items-center text-sm cursor-pointer ${activeLink === text && "text-stone-900 font-bold "}`} onClick={() => scrollToSection(text)}>
+          <Stack key={text} className={`place-items-center text-sm cursor-pointer  ${activeLink === text && "text-stone-900 font-black "}`} onClick={() => scrollToSection(text)}>
             <span>{ icon }</span>
             <h3>{ text }</h3>
           </Stack>

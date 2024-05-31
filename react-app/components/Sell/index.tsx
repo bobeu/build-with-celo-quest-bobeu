@@ -98,14 +98,14 @@ export default function Sell({supportedAssets, refresh}: {supportedAssets: Suppo
     }
 
     return(
-        <Box className="space-y-4">
+        <Box className="space-y-4 p-4">
             <Box className="flex justify-between items-center text-md">
-                <h3 className="font-black text-orange-900">Create your Ad</h3>
+                <h3 className="font-black text-green-600">Create your Ad</h3>
                 <h3 className="text-xs font-medium">{`Bal: ${ethers.utils.formatEther(balance.toString()).toString()} `}</h3>
             </Box>
             {/* <Divider /> */}
-            <Box className="max-h-[200px] overflow-auto ">
-                <button onClick={() => setDisplay(!displayAsset)} className="w-full bg-gray-100 p-2 flex justify-between items-center text-stone-800 rounded-sm border-2 border-gray-200 text-sm md:text-lg">
+            <Box className="max-h-[200px] overflow-auto bg-gray-300 p-2 rounded-lg">
+                <button onClick={() => setDisplay(!displayAsset)} className="w-full bg-green-100 p-2 flex justify-between items-center text-stone-800 rounded-lg border-2 border-gray-200 text-sm md:text-lg">
                     <h3>{selectedAsset?.name || "Pick Your Assets"}</h3>
                     <span>
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
@@ -124,7 +124,7 @@ export default function Sell({supportedAssets, refresh}: {supportedAssets: Suppo
                     }
                 </div>
             </Box>
-            <Box className="place-items-center">
+            <Box className="place-items-center bg-gray-300 p-2 rounded-lg">
                 <Stack className="w-full space-y-2">
                     <h3>{"Quantity: "}</h3>
                     <div className="flex justify-between items-center gap-1">
@@ -133,18 +133,18 @@ export default function Sell({supportedAssets, refresh}: {supportedAssets: Suppo
                             name="Quantity" 
                             id="quantity" 
                             placeholder={`Quantity of ${selectedAsset?.name || 'asset'} you wish to sell`}
-                            className="bg-gray-100 p-2 rounded-sm border-2 border-gray-200 w-full text-sm text-stone-800 md:text-lg"
+                            className="bg-green-100 p-2 rounded-lg border-2 border-gray-200 w-full text-sm text-stone-800 md:text-lg"
                             onChange={(e) => handleChangeEvent(e, "quantity")}
                         />
-                        <button disabled className="w-[fit-content] bg-gray-100 border-2 border-gray-200 p-2 rounded-sm text-sm md:text-lg">{quantity || '0'}</button>
+                        <button disabled className="w-[fit-content] bg-green-100 border-2 border-gray-200 p-2 rounded-lg text-sm md:text-lg">{quantity || '0'}</button>
                     </div>
                 </Stack>
             </Box>
             <Box>
                 {
                     selectedAsset && 
-                        <button onClick={handleApprovalRequest} disabled={loading} className={`rounded-sm w-full border-2 border-stone-700 bg-stone-900 text-white p-2 hover:bg-stone-700 active:bg-stone-600 ${loading && "bg-opacity-10"}`}>
-                            approve
+                        <button onClick={handleApprovalRequest} disabled={loading} className={`rounded-lg w-full border-2 border-stone-700 bg-stone-900 text-white p-2 hover:bg-stone-700 active:bg-stone-600 ${loading && "bg-opacity-10 border-none"}`}>
+                            {`Approve ${selectedAsset.name}`}
                         </button>
                 }
             </Box>
@@ -170,7 +170,7 @@ export default function Sell({supportedAssets, refresh}: {supportedAssets: Suppo
             <Stack className="place-items-center">
                 {
                     approvalDone && 
-                        <button onClick={handleCreateAd} disabled={loading} className={`rounded-sm w-full border-2 border-stone-700 bg-stone-900 text-white p-2 hover:bg-stone-700 active:bg-stone-600 ${loading && "bg-opacity-10"}`}>
+                        <button onClick={handleCreateAd} disabled={loading} className={`rounded-lg w-full border-2 border-stone-700 bg-stone-900 text-white p-2 hover:bg-stone-700 active:bg-stone-600 ${loading && "bg-opacity-10"}`}>
                             Create Ad
                         </button>
                 }
