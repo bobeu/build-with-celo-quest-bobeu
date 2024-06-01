@@ -6,6 +6,7 @@ import "hardhat-deploy";
 dotConfig();
 
 const PRIVATE_KEY = String(process.env.PRIVATE_KEY);
+const PRIVATE_KEY_M = String(process.env.PRIVATE_KEY_M);
 
 const config: HardhatUserConfig = {
     networks: {
@@ -47,12 +48,12 @@ const config: HardhatUserConfig = {
         deployer: {
           default: 0,
           44787: `privatekey://${PRIVATE_KEY}`,
-          42220: `privatekey://${PRIVATE_KEY}`,
+          42220: `privatekey://${PRIVATE_KEY_M}`,
         },
         cUSD: {
             default: 1,
             44787: "0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1",
-            42220: ""
+            42220: "0x765de816845861e75a25fca122bb6898b8b1282a"
         },
         other: {
             default: 2,
@@ -65,10 +66,10 @@ const config: HardhatUserConfig = {
     version: "0.8.20",
     settings: {          // See the solidity docs for advice about optimization and evmVersion
         optimizer: {
-        enabled: true,
-        runs: 200,
+            enabled: true,
+            runs: 200,
         },
-        evmVersion: "byzantium"
+            evmVersion: "byzantium"
         }
     },
 };

@@ -1,4 +1,5 @@
 import artifacts from "../../../hardhat/deployments/alfajores/Registry.json";
+// import artifacts from "../../../hardhat/deployments/celo/Registry.json";
 
 export type OxString = `0x${string}`;
 export type WagmiConfig = import('wagmi').Config;

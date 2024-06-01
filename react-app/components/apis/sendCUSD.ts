@@ -3,15 +3,16 @@ import StableTokenABI from "./cUSD.json";
 import { celoAlfajores, celo } from "viem/chains";
 import { OxString } from "./contractAddress";
 
-// const isTestnet = process.env.CONTEXT === "TESTNET"; 
 const isTestnet = true; 
+// const isTestnet = false; 
 const publicClient = createPublicClient({
   chain: isTestnet? celoAlfajores : celo,
   transport: http(),
 });
 
 export const getCUSD = () : OxString => {
-    return "0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1";
+  return "0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1";
+    // return "0x765de816845861e75a25fca122bb6898b8b1282a";
 } 
 export default async function sendCUSD(to: string, amount: bigint) {
     let walletClient = createWalletClient({

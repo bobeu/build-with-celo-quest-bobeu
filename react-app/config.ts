@@ -14,7 +14,7 @@ export const connectors = connectorsForWallets(
         },
     ],
     {
-        appName: "Paycraft",
+        appName: "Coinpicker",
         projectId: String(projectId),
     }
 );

@@ -22,7 +22,7 @@ export default function Header(props: { items: CartItem[], activeLink: SectionId
         if (window.ethereum && window.ethereum.isMiniPay) {
             connect({ connector: injected({ target: "metaMask" }) });
         }
-    }, [connect]);
+    }, [connect, hideConnectBtn]);
     
 
     return (
