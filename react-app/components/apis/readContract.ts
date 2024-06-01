@@ -196,36 +196,36 @@ const getAllowanceAbi = [
   },
 ] as const;
 
-export const getData = async(args: {config: WagmiConfig, account: OxString, callback?: Callback}) => {
-    const { config, account, callback } = args;
+export const getData = async(args: {config: WagmiConfig, chainId: number, account: OxString, callback?: Callback}) => {
+    const { config, account, callback, chainId } = args;
     const result : Storage = await readContract(config, {
         abi: readDataAbi,
         functionName: "getData",
         account,
-        address: registry
+        address: registry(chainId)
     });
     // return result;
     callback?.({result});
 }
 
-export const getBalance = async(args: {config: WagmiConfig, account: OxString, contractAddr?: OxString }) => {
-  const { config, account, contractAddr } = args;
+export const getBalance = async(args: {config: WagmiConfig, chainId: number, account: OxString, contractAddr?: OxString }) => {
+  const { config, account, contractAddr, chainId } = args;
     return await readContract(config, {
         abi: getBalanceAbi,
         functionName: "balanceOf",
-        address: contractAddr? contractAddr : getCUSD(),
+        address: contractAddr? contractAddr : getCUSD(chainId),
         args: [account]
     });
 }
 
-export const getAllowance = async(args: {config: WagmiConfig, account: OxString, contractAddr?: OxString }) => {
-  const { config, account, contractAddr } = args;
+export const getAllowance = async(args: {config: WagmiConfig, chainId: number, account: OxString, contractAddr?: OxString }) => {
+  const { config, account, contractAddr, chainId } = args;
     return bn(
       await readContract(config, {
         abi: getAllowanceAbi,
         functionName: "allowance",
-        address: contractAddr? contractAddr : getCUSD(),
-        args: [account, registry]
+        address: contractAddr? contractAddr : getCUSD(chainId),
+        args: [account, registry(chainId)]
       })
     )
 }

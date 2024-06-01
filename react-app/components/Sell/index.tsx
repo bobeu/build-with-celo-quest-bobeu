@@ -18,7 +18,7 @@ export default function Sell({supportedAssets, refresh}: {supportedAssets: Suppo
     const [ loading, setLoading ] = React.useState<boolean>(false);
     const [ balance, setBalance ] = React.useState<ethers.BigNumber>(ethers.BigNumber.from(0));
 
-    const { address : account, isConnected } = useAccount();
+    const { address : account, isConnected, chainId } = useAccount();
     const config = useConfig();
 
     const handleSelectedAssetClick = async(option: {name: string, assetContract: OxString, assetId: bigint}) => {
@@ -26,7 +26,8 @@ export default function Sell({supportedAssets, refresh}: {supportedAssets: Suppo
         setSelected({name, assetContract, assetId});
         setDisplay(false);
         if(!account) return;
-        await getBalance({config, account, contractAddr: assetContract})
+        if(!chainId) return;
+        await getBalance({config, account, contractAddr: assetContract, chainId})
             .then((result) => setBalance(bn(result)));
     }
 
@@ -50,9 +51,10 @@ export default function Sell({supportedAssets, refresh}: {supportedAssets: Suppo
         if(!selectedAsset?.assetContract) return;
         if(!quantity) return;
         if(!account) return;
+        if(!chainId) return;
         let diff : ethers.BigNumber = ethers.BigNumber.from(0);
         const amtToSell = powr(quantity, 1, 18);
-        const allowance = await getAllowance({config, account, contractAddr: selectedAsset?.assetContract})
+        const allowance = await getAllowance({config, account, chainId, contractAddr: selectedAsset?.assetContract})
         console.log("amountToSell", amtToSell.toString());
         if(allowance.lt(amtToSell)) {
             diff = amtToSell.sub(allowance);
@@ -62,8 +64,8 @@ export default function Sell({supportedAssets, refresh}: {supportedAssets: Suppo
                     config,
                     account,
                     amount: diff.toBigInt(),
-                    contractAddress: selectedAsset?.assetContract
-        
+                    contractAddress: selectedAsset?.assetContract,
+                    chainId
                 }).then(() => {
                     setApprovalDone(true);
                     setLoading(false);
@@ -83,13 +85,14 @@ export default function Sell({supportedAssets, refresh}: {supportedAssets: Suppo
         if(!isConnected) return;
         if(!priceLimit) return;
         if(!account) return;
+        if(!chainId) return;
         setLoading(true);
         await addItemToStorefront({
             config,
             account,
             priceLimit: ethers.utils.parseUnits(priceLimit, "ether").toBigInt(),
             assetId: selectedAsset?.assetId!,
-
+            chainId
         }).then(() => {
             setApprovalDone(false);
             setLoading(false);

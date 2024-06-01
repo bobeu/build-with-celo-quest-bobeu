@@ -26,7 +26,7 @@ export default function Home() {
     const [ signal, setSignal ] = React.useState<number>(0);
     const [ storage, setStorage ] = React.useState<Storage>();
     
-    const { address, isConnected } = useAccount();
+    const { address, isConnected, chainId } = useAccount();
     const config = useConfig();
     
     const scrollToSection = (sectionId: SectionId, seller?: OxString | string) => {
@@ -93,11 +93,12 @@ export default function Home() {
     React.useEffect(() => {
         const ab = new AbortController();
 
-        if (isConnected && address) {
+        if (isConnected && address && chainId) {
             setUserAddress(address);
             const read = async() => {
                 await getData({
                     config, 
+                    chainId,
                     account: address,     
                     callback: (result) => {
                         if(result?.result) {
@@ -110,7 +111,7 @@ export default function Home() {
             read();
         }
         return() => { ab.abort(); }
-    }, [address, isConnected, signal, config]);
+    }, [address, isConnected, signal, config, chainId]);
 
     const sections : {id: SectionId, element: JSX.Element}[] = [
         {

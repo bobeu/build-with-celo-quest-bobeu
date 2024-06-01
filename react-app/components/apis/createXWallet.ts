@@ -19,14 +19,14 @@ const createWalletAbi = [
   },
 ] as const;
 
-export async function createXWallet(args: {config: Config, account: OxString}) {
-  const { config, account } = args;
+export async function createXWallet(args: {config: Config, chainId: number, account: OxString}) {
+  const { config, account, chainId } = args;
   const { request } = await simulateContract(config, {
-    address: registry,
+    address: registry(chainId),
     account,
     abi: createWalletAbi,
     functionName: "createXWallet",
   });
   const hash = await writeContract(config, request ); 
-  return await waitForConfirmation(config, hash, account);
+  return await waitForConfirmation(config, hash, account, chainId);
 }

@@ -39,17 +39,17 @@ const buyItemAbi = [
   },
 ] as const;
 
-const scrutinizeBalance = async({config, xWallet, account, costPriceInCUSD}:{config: Config, account: OxString, xWallet: OxString, costPriceInCUSD: bigint, }) : Promise<boolean> => {
+const scrutinizeBalance = async({config, xWallet, account, costPriceInCUSD, chainId}:{config: Config, account: OxString, xWallet: OxString, chainId: number, costPriceInCUSD: bigint, }) : Promise<boolean> => {
   let canExecute = false;
-  const balance = await getBalance({config, account: xWallet});
-  console.log("balance", balance.toString());
+  const balance = await getBalance({config, account: xWallet, chainId });
+  // console.log("balance", balance.toString());
   if(bn(balance).lt(bn(costPriceInCUSD))){
     const topUp = bn(costPriceInCUSD).sub(bn(balance));
-    const balSender = await getBalance({config, account});
-    console.log("Topup", topUp.toString());
-    console.log("balSender", balSender.toString());
+    const balSender = await getBalance({config, account, chainId});
+    // console.log("Topup", topUp.toString());
+    // console.log("balSender", balSender.toString());
     if(bn(balSender).gte(topUp)){
-      await sendCUSD(xWallet, topUp.toBigInt())
+      await sendCUSD(xWallet, topUp.toBigInt(), chainId)
         .then(() => canExecute = true );
     }
   } else { canExecute = true; }
@@ -57,15 +57,15 @@ const scrutinizeBalance = async({config, xWallet, account, costPriceInCUSD}:{con
   return canExecute;
 } 
 
-export async function buy(args: {config: Config, storeId: bigint, offerPrice: bigint, amountToBuy: bigint, xWallet: OxString, callback?: Callback, account: OxString, costPriceInCUSD: bigint}) {
-  const { config, callback, account, xWallet, storeId, offerPrice, costPriceInCUSD, amountToBuy } = args;
+export async function buy(args: {config: Config, chainId: number, storeId: bigint, offerPrice: bigint, amountToBuy: bigint, xWallet: OxString, callback?: Callback, account: OxString, costPriceInCUSD: bigint}) {
+  const { config, callback, account, xWallet, chainId, storeId, offerPrice, costPriceInCUSD, amountToBuy } = args;
   callback?.({txStatus: "Pending"});
-  const canExecute = await scrutinizeBalance({config, account, xWallet, costPriceInCUSD});
+  const canExecute = await scrutinizeBalance({config, account, xWallet, costPriceInCUSD, chainId});
   if(canExecute) {
     // console.log("offerPrice", offerPrice.toString())
     // console.log("amountToBuy", amountToBuy.toString())
     const { request } = await simulateContract(config, {
-      address: registry,
+      address: registry(chainId),
       account,
       abi: buyItemAbi,
       functionName: "buy",
@@ -73,7 +73,7 @@ export async function buy(args: {config: Config, storeId: bigint, offerPrice: bi
     });
     callback?.({txStatus: "Confirming"});
     const hash = await writeContract(config, request ); 
-    await waitForConfirmation(config, hash, account, callback);
+    await waitForConfirmation(config, hash, account, chainId, callback);
   } else { alert("Not enough balance")}
 }
 
@@ -81,6 +81,7 @@ export async function sendBatchTransaction(
     config: Config, 
     account: OxString,
     xWallet: OxString,
+    chainId: number,
     param: CartItem[]
 ) {
   const multicallParam : MulticallParameters = {
@@ -89,7 +90,7 @@ export async function sendBatchTransaction(
       (item) => {
         return {
           abi: buyItemAbi,
-          address: registry,
+          address: registry(chainId),
           account,
           functionName: "buy",
           args: [item.storeId, item.offerPrice, item.amountToBuy]
@@ -101,8 +102,8 @@ export async function sendBatchTransaction(
   param.forEach((item) =>{
     costPriceInCUSD = bn(costPriceInCUSD).add(bn(item.costPriceInCUSD)).add(ethers.utils.parseUnits("0.1", "ether")).toBigInt();
   });
-  console.log("costPriceInCUSD", costPriceInCUSD.toString());
-  const canExecute = await scrutinizeBalance({config, account, xWallet, costPriceInCUSD});
+  // console.log("costPriceInCUSD", costPriceInCUSD.toString());
+  const canExecute = await scrutinizeBalance({config, chainId, account, xWallet, costPriceInCUSD});
   if(!canExecute) return;
   return await multicall(config, multicallParam);
 }

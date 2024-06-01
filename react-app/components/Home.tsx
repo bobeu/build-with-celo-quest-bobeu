@@ -23,7 +23,7 @@ export const Home: React.FC<HomeProps> = ({mockStorage, storage, refresh, coinCa
     const storageInUse = storage? storage : mockStorage;
     const { stores, xWallets } = storageInUse;
 
-    const { address : account, } = useAccount();
+    const { address : account, chainId } = useAccount();
     const config = useConfig();
 
     const handleCheckout = async() => {
@@ -32,13 +32,14 @@ export const Home: React.FC<HomeProps> = ({mockStorage, storage, refresh, coinCa
         let xWallet = xWallets.filter((item) => item.owner.toLowerCase() === account.toLowerCase())?.at(0)?.xWallet;
         console.log("xWallet", xWallet);
         let canExecute = xWallet !== undefined;
+        if(!chainId) return;   
         if(!canExecute) {
-            await createXWallet({config, account})
+            await createXWallet({config, account, chainId})
                 .then(() => {
                     canExecute = true;
-                    refresh("You successfully created an 'X' wallet");
+                    refresh("We could not detect xWallet, so we created one for you");
                 });
-            await getData({config, account, callback: (result) => {
+            await getData({config, account, chainId, callback: (result) => {
                 xWallet = result.result?.xWallets.filter((item) => item.owner.toLowerCase() === account.toLowerCase())?.at(0)?.xWallet;
             } });
         }
@@ -47,13 +48,13 @@ export const Home: React.FC<HomeProps> = ({mockStorage, storage, refresh, coinCa
             try {
                 if(items.length === 1) {
                     console.log("Sending unit trx");
-                    await buy({config, storeId, offerPrice, account, amountToBuy, xWallet: xWallet!, costPriceInCUSD: totalCost })
+                    await buy({config, storeId, offerPrice, chainId, account, amountToBuy, xWallet: xWallet!, costPriceInCUSD: totalCost })
                         .then(() => removeFromCart(items[0]));
                 } else {
                     console.log("Sending batch trx");
-                    await sendBatchTransaction(config, account, xWallet!, items)
+                    await sendBatchTransaction(config, account, xWallet!, chainId, items)
                         .then((result) => {
-                            console.log("Result", result);
+                            // console.log("Result", result);
                             for(let i = 0; i < items.length; i++) {
                                 if(result?.at(i)?.status === "success") {
                                     removeFromCart(items[i]);

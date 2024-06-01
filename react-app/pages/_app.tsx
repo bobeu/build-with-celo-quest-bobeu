@@ -19,6 +19,7 @@ const connectors = connectorsForWallets(
     {
         appName: "Celo Composer",
         projectId: "044601f65212332475a09bc14ceb3c34",
+        // String(process.env.NEXT_PUBLIC_PROJECTID)
     }
 );
 
