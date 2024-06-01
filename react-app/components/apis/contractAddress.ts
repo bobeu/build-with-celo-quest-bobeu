@@ -1,5 +1,5 @@
 import testnet from "../../../hardhat/deployments/alfajores/Registry.json";
-import mainnet from "../../../hardhat/deployments/celo/Registry.json";
+import mainnet from "../../../hardhat/deployments/celo/RegistryMain.json";
 
 export type OxString = `0x${string}`;
 export type WagmiConfig = import('wagmi').Config;
