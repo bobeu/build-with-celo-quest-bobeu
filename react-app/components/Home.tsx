@@ -341,10 +341,8 @@ export const Home: React.FC<HomeProps> = ({mockStorage, storage, refresh, coinCa
                                 </Stack>
                                 <Stack className="place-items-end">
                                     <h3>{item.metadata.symbol}</h3>
-                                    <div className="bg-green-100 rounded-lg text-xs text-stone-800 p-1 font-serif">
-                                        <h3>min</h3>
+                                    <div className="bg-green-100 rounded-lg text-center text-xs text-stone-800 py-2 px-1 font-serif">
                                         <h3>{`${ethers.utils.formatEther(item.priceLimit.toString())}`}</h3>
-
                                     </div>
                                 </Stack>
                             </Box> 
