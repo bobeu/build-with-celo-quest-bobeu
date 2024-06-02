@@ -46,8 +46,6 @@ const scrutinizeBalance = async({config, xWallet, account, costPriceInCUSD, chai
   if(bn(balance).lt(bn(costPriceInCUSD))){
     const topUp = bn(costPriceInCUSD).sub(bn(balance));
     const balSender = await getBalance({config, account, chainId});
-    // console.log("Topup", topUp.toString());
-    // console.log("balSender", balSender.toString());
     if(bn(balSender).gte(topUp)){
       await sendCUSD(xWallet, topUp.toBigInt(), chainId)
         .then(() => canExecute = true );

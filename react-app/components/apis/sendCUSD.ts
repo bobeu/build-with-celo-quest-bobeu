@@ -3,12 +3,12 @@ import StableTokenABI from "./cUSD.json";
 import { celoAlfajores, celo } from "viem/chains";
 import { OxString } from "./contractAddress";
 
-// const isTestnet = true; 
-const isTestnet = false; 
-const publicClient = createPublicClient({
-  chain: isTestnet? celoAlfajores : celo,
-  transport: http(),
-});
+const configurePublicClient = (chainId: number) => {
+  return createPublicClient({
+    chain: chainId === 44787? celoAlfajores : celo,
+    transport: http(),
+  });
+}
 
 export const getCUSD = (chainId: number) : OxString => {
   return chainId === 44787? "0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1" : "0x765de816845861e75a25fca122bb6898b8b1282a";
@@ -17,7 +17,7 @@ export const getCUSD = (chainId: number) : OxString => {
 export default async function sendCUSD(to: string, amount: bigint, chainId: number,) {
     let walletClient = createWalletClient({
         transport: custom(window.ethereum),
-        chain: isTestnet? celoAlfajores : celo,
+        chain: chainId === 44787? celoAlfajores : celo,
     });
     let [address] = await walletClient.getAddresses();
 
@@ -29,7 +29,7 @@ export default async function sendCUSD(to: string, amount: bigint, chainId: numb
       args: [to, amount],
     });
 
-    let receipt = await publicClient.waitForTransactionReceipt({
+    let receipt = await configurePublicClient(chainId).waitForTransactionReceipt({
       hash: tx,
     });
 

@@ -28,11 +28,11 @@ export const Home: React.FC<HomeProps> = ({mockStorage, storage, refresh, coinCa
 
     const handleCheckout = async() => {
         if(!account) return alert("Not Inside Minipay Wallet");
+        if(!chainId) return alert("Wallet not ready");
         const { item: { info: {storeId}}, offerPrice, amountToBuy, costPriceInCUSD } = items[0];
         let xWallet = xWallets.filter((item) => item.owner.toLowerCase() === account.toLowerCase())?.at(0)?.xWallet;
         console.log("xWallet", xWallet);
         let canExecute = xWallet !== undefined;
-        if(!chainId) return;   
         if(!canExecute) {
             await createXWallet({config, account, chainId})
                 .then(() => {
@@ -47,7 +47,7 @@ export const Home: React.FC<HomeProps> = ({mockStorage, storage, refresh, coinCa
             const totalCost = bn(costPriceInCUSD).add(ethers.utils.parseUnits("0.1", "ether")).toBigInt();
             try {
                 if(items.length === 1) {
-                    console.log("Sending unit trx");
+                    console.log("chainId", chainId);
                     await buy({config, storeId, offerPrice, chainId, account, amountToBuy, xWallet: xWallet!, costPriceInCUSD: totalCost })
                         .then(() => removeFromCart(items[0]));
                 } else {
