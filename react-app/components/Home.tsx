@@ -325,9 +325,10 @@ export const Home: React.FC<HomeProps> = ({mockStorage, storage, refresh, coinCa
                 {
                     stores.length > 0? stores.filter((item) => (coinCategory === "" || coinCategory === "ALL")? true : COIN_CATEGORY[item.metadata.category].id === coinCategory.toLowerCase())
                         .filter((item) => (!searchResult || searchResult === "")? true : (item.metadata.name.toLowerCase() === searchResult.toLowerCase() || item.metadata.symbol.toLowerCase() === searchResult.toLowerCase()))
+                        .filter((item) => bn(item.info.quantity).gt(0))
                         .map((item, index) => (
                         <Grid item xs={6} md={3} key={index}> 
-                            <Box onClick={toggleDrawer("bottom", true, "selectedAsset", item)} className="border-2 bg-stone-900 rounded-lg p-2 text-xs cursor-pointer text-green-100 font-semibold self-stretch flex justify-between items-center hover:bg-stone-300 hover:text-orange-900 active:border-2 active:border-green-400">
+                            <Box onClick={toggleDrawer("bottom", true, "selectedAsset", item)} className="border-2 bg-stone-900 rounded-lg p-1 text-xs cursor-pointer text-green-100 font-semibold self-stretch flex justify-between items-center gap-1 hover:bg-stone-300 hover:text-orange-900 active:border-2 active:border-green-400">
                                 <Stack className="place-items-center">
                                     <p style={{fontSize: "0.5rem"}} className="font-mono text-orange-200">{COIN_CATEGORY[item.metadata.category].id}</p>
                                     <Image 
@@ -340,7 +341,11 @@ export const Home: React.FC<HomeProps> = ({mockStorage, storage, refresh, coinCa
                                 </Stack>
                                 <Stack className="place-items-end">
                                     <h3>{item.metadata.symbol}</h3>
-                                    <h3>{`min/${ethers.utils.formatEther(item.priceLimit.toString())}`}</h3>
+                                    <div className="bg-green-100 rounded-lg text-xs text-stone-800 p-1 font-serif">
+                                        <h3>min</h3>
+                                        <h3>{`${ethers.utils.formatEther(item.priceLimit.toString())}`}</h3>
+
+                                    </div>
                                 </Stack>
                             </Box> 
                         </Grid>
