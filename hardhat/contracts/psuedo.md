@@ -1,7 +1,7 @@
 Coinpicker is an ecommerce platform to shop for cryptocurrencies. Buyers can shop for different coins or tokens of their choices, add them to the cart and check out anytime.
 
 Coinpicker smart contract has the capacity to interact with other contracts on other chains.
-The architecture allows token owners to deposit their token into the token contact vault, set a price
+The architecture allows token owners to deposit their token to the registry and set a price
 range and allow anyone to speculate and purchase then via the coinpicker interface. It blends 
 the features of ecommerce with cryptocurrency to bring a new parandigm of cryptocurrency exchange. Coinpicker is a storefront for different kinds of ERC20 and ERC721 tokens.
 
